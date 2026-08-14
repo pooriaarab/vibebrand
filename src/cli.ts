@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import { DIRECTIONS, getDirection } from "./catalog.js";
-import { renderTokensCss, renderTokensJson, googleFontsHref } from "./tokens.js";
+import {
+  renderTokensCss,
+  renderTokensJson,
+  googleFontsHref,
+  checkContrast,
+} from "./tokens.js";
+import type { BrandDirection } from "./catalog.js";
 
 const [cmd, arg] = process.argv.slice(2);
 
@@ -34,6 +40,26 @@ switch (cmd) {
   case "fonts":
     console.log(googleFontsHref(need(arg)));
     break;
+  case "check": {
+    const targets: BrandDirection[] = arg === "--all" || arg === undefined ? DIRECTIONS : [need(arg)];
+    let failed = 0;
+    for (const d of targets) {
+      const checks = checkContrast(d);
+      const bad = checks.filter((c) => !c.pass);
+      failed += bad.length;
+      const mark = bad.length === 0 ? "PASS" : "FAIL";
+      console.log(`\n${mark}  ${d.id} — ${d.name}`);
+      for (const c of checks) {
+        console.log(`  ${c.pass ? "ok " : "XX "} ${c.ratio.toFixed(2).padStart(5)}:1  ${c.level.padEnd(8)}  ${c.pair}`);
+      }
+    }
+    if (failed > 0) {
+      console.error(`\n${failed} contrast pair(s) below WCAG AA (4.5:1).`);
+      process.exit(1);
+    }
+    console.log("\nAll pairs pass WCAG AA.");
+    break;
+  }
   case undefined:
   case "help":
   case "-h":
@@ -47,6 +73,7 @@ switch (cmd) {
         "  vibebrand tokens <id>         print the design-system CSS (custom properties)",
         "  vibebrand json <id>           print structured tokens as JSON",
         "  vibebrand fonts <id>          print the Google Fonts <link> href",
+        "  vibebrand check [id|--all]    WCAG AA contrast report (exits 1 on any fail)",
         "",
         "example:",
         "  vibebrand tokens brutalist > tokens.css",

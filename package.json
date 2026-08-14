@@ -38,6 +38,7 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
+    "test": "tsup && node dist/cli.js check --all",
     "prepublishOnly": "npm run build"
   },
   "publishConfig": {

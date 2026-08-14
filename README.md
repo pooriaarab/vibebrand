@@ -28,11 +28,24 @@ vb.tokens("aurora");    // CSS custom properties
 vb.json("aurora");      // structured token object
 ```
 
-Each direction ships a light + dark palette (oklch), a radius + shadow language
-matched to its "press personality", and display/body/mono fonts. Drop the CSS on
-`:root`, reference `var(--bg)`, `var(--fg)`, `var(--accent)`, `var(--radius)`,
-`var(--shadow-md)`, `var(--font-display)` in your components, and the whole UI
-themes — including a working dark mode.
+Each direction ships a **3-color system** (`--primary` / `--secondary` /
+`--tertiary`) plus surfaces and text, in light + dark (oklch), a radius + shadow
+language matched to its "press personality", and display/body/mono fonts. Drop
+the CSS on `:root`, reference `var(--bg)`, `var(--fg)`, `var(--primary)`,
+`var(--on-primary)`, `var(--radius)`, `var(--shadow-md)`, `var(--font-display)`
+in your components, and the whole UI themes — including a working dark mode.
+
+## Accessible by construction
+
+Every palette is **WCAG AA contrast-checked** (built-in oklch → WCAG engine). The
+text color for each brand fill (`--on-primary`, `--on-secondary`, `--on-tertiary`)
+is auto-picked for ≥4.5:1 contrast, and `fg`/`muted` clear AA on `bg`. Verify any
+direction — or gate CI on it:
+
+```bash
+npx vibebrand check brutalist   # per-pair ratio + WCAG level
+npx vibebrand check --all       # exits 1 if any pair is below AA
+```
 
 ## The directions
 
