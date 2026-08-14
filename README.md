@@ -11,7 +11,9 @@ and theme every time, commit to a *direction* and generate the foundation.
 ```bash
 npx vibebrand directions          # list the directions
 npx vibebrand tokens brutalist    # print the design-system CSS
-npx vibebrand tokens signal > tokens.css
+npx vibebrand tailwind signal     # Tailwind v4 @theme block
+npx vibebrand logo aurora         # generative brand mark (SVG)
+npx vibebrand init blueprint      # write tokens.css + tailwind.css + logo.svg into your project
 ```
 
 ## Use it as a library
@@ -56,12 +58,13 @@ npx vibebrand check --all       # exits 1 if any pair is below AA
 
 ## Roadmap
 
-- **Logo / favicon / OG generators** — emit an SVG mark, favicon set, and OG
-  image per direction.
+Shipped: Tailwind v4 `@theme` export (`tailwind`), a generative brand mark
+(`logo`), and project scaffolding (`init`). Next:
+
+- **Favicon + OG generators** — a favicon set and an OG image per direction.
 - **MCP server** (`vibebrand-mcp`) — drive the generators from any AI agent.
-- **`vibebrand init`** — scaffold tokens + logo + a `/brand` guidelines page
-  straight into a project.
-- **Framework adapters** — Tailwind v4 `@theme` export, shadcn token map.
+- **`vibebrand init` → `/brand` page** — also scaffold a live guidelines page.
+- **shadcn token map** adapter; publish to npm.
 
 Part of the [getvibe.dev](https://getvibe.dev) family.
 

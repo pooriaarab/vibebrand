@@ -23,6 +23,12 @@ export {
   relativeLuminance,
   type WcagLevel,
 } from "./contrast.js";
+export {
+  renderLogoSvg,
+  renderLockupSvg,
+  renderTailwindTheme,
+  renderInitFiles,
+} from "./generators.js";
 
 import { DIRECTIONS, getDirection } from "./catalog.js";
 import { renderTokensCss, renderTokensJson, checkContrast } from "./tokens.js";
