@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { writeFileSync } from "node:fs";
+
 import { DIRECTIONS, getDirection } from "./catalog.js";
 import {
   renderTokensCss,
@@ -6,9 +8,14 @@ import {
   googleFontsHref,
   checkContrast,
 } from "./tokens.js";
+import {
+  renderLogoSvg,
+  renderTailwindTheme,
+  renderInitFiles,
+} from "./generators.js";
 import type { BrandDirection } from "./catalog.js";
 
-const [cmd, arg] = process.argv.slice(2);
+const [cmd, arg, arg2] = process.argv.slice(2);
 
 function listDirections() {
   const w = Math.max(...DIRECTIONS.map((d) => d.id.length));
@@ -40,6 +47,22 @@ switch (cmd) {
   case "fonts":
     console.log(googleFontsHref(need(arg)));
     break;
+  case "logo":
+    process.stdout.write(renderLogoSvg(need(arg), arg2 === "dark" ? "dark" : "light") + "\n");
+    break;
+  case "tailwind":
+    process.stdout.write(renderTailwindTheme(need(arg)) + "\n");
+    break;
+  case "init": {
+    const d = arg ? need(arg) : DIRECTIONS[0];
+    const files = renderInitFiles(d, renderTokensCss(d));
+    for (const [name, contents] of Object.entries(files)) {
+      writeFileSync(name, contents);
+      console.log(`wrote ${name}`);
+    }
+    console.log(`\nInitialized the "${d.name}" brand system. Import vibebrand-tokens.css and go.`);
+    break;
+  }
   case "check": {
     const targets: BrandDirection[] = arg === "--all" || arg === undefined ? DIRECTIONS : [need(arg)];
     let failed = 0;
@@ -74,6 +97,9 @@ switch (cmd) {
         "  vibebrand json <id>           print structured tokens as JSON",
         "  vibebrand fonts <id>          print the Google Fonts <link> href",
         "  vibebrand check [id|--all]    WCAG AA contrast report (exits 1 on any fail)",
+        "  vibebrand logo <id> [dark]    print the generative brand mark as SVG",
+        "  vibebrand tailwind <id>       print a Tailwind v4 @theme block",
+        "  vibebrand init [id]           write tokens.css + tailwind.css + logo.svg into cwd",
         "",
         "example:",
         "  vibebrand tokens brutalist > tokens.css",
