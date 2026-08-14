@@ -1,0 +1,54 @@
+{
+  "name": "vibebrand",
+  "version": "0.1.0",
+  "description": "Generate a complete, tokenized brand/design system — pick a direction, get CSS design tokens (light + dark), fonts, and a starting point for logo/favicon/OG. SDK + CLI (MCP coming). Productizes the saas-brand-system workflow.",
+  "keywords": [
+    "branding",
+    "design-system",
+    "design-tokens",
+    "css-variables",
+    "theme",
+    "palette",
+    "oklch",
+    "dark-mode",
+    "generator",
+    "cli"
+  ],
+  "license": "MIT",
+  "author": "Pooria Arab",
+  "homepage": "https://getvibe.dev/vibebrand",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pooriaarab/vibebrand.git"
+  },
+  "type": "module",
+  "bin": {
+    "vibebrand": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsup": "^8",
+    "typescript": "^5"
+  }
+}
