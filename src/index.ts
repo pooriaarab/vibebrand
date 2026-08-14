@@ -13,10 +13,19 @@ export {
   renderTokensCss,
   renderTokensJson,
   googleFontsHref,
+  checkContrast,
+  pickOn,
+  type ContrastCheck,
 } from "./tokens.js";
+export {
+  contrastRatio,
+  wcagLevel,
+  relativeLuminance,
+  type WcagLevel,
+} from "./contrast.js";
 
 import { DIRECTIONS, getDirection } from "./catalog.js";
-import { renderTokensCss, renderTokensJson } from "./tokens.js";
+import { renderTokensCss, renderTokensJson, checkContrast } from "./tokens.js";
 
 /** Convenience façade over the catalog + token generators. */
 export function createVibebrand() {
@@ -34,6 +43,12 @@ export function createVibebrand() {
       const d = getDirection(id);
       if (!d) throw new Error(`unknown direction: ${id}`);
       return renderTokensJson(d);
+    },
+    /** WCAG contrast report for a direction id (light + dark). */
+    check: (id: string) => {
+      const d = getDirection(id);
+      if (!d) throw new Error(`unknown direction: ${id}`);
+      return checkContrast(d);
     },
   };
 }
