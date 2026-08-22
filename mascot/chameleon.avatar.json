@@ -52,6 +52,21 @@
     "wink": {
       "eyeL": { "type": "path", "d": "M188 252 q18 12 36 0", "fill": "none", "stroke": "ink", "strokeWidth": 6, "r": null, "cx": null, "cy": null },
       "hiL": { "fill": null }
+    },
+    "excited": {
+      "eyeL": { "r": 15 },
+      "eyeR": { "r": 15 },
+      "mouth": { "type": "ellipse", "cx": 256, "cy": 322, "rx": 17, "ry": 14, "fill": "ink", "stroke": null, "strokeWidth": null, "d": null }
+    },
+    "sad": {
+      "eyeL": { "type": "path", "d": "M188 258 q18 -13 36 -6", "fill": "none", "stroke": "ink", "strokeWidth": 6, "r": null, "cx": null, "cy": null },
+      "eyeR": { "type": "path", "d": "M290 244 q18 -7 36 6", "fill": "none", "stroke": "ink", "strokeWidth": 6, "r": null, "cx": null, "cy": null },
+      "hiL": { "fill": null }, "hiR": { "fill": null },
+      "mouth": { "d": "M214 328 Q256 300 298 328" }
+    },
+    "skeptical": {
+      "eyeR": { "r": 6 },
+      "mouth": { "d": "M232 322 H280" }
     }
   },
   "accessories": {},
