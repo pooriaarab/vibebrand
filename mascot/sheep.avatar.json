@@ -1,67 +1,63 @@
 {
   "name": "supportsheep",
   "viewBox": [0, 0, 400, 400],
-  "tilt": -4,
-  "focus": { "cx": 256, "cy": 292, "scale": 0.9 },
+  "tilt": -3,
+  "focus": { "cx": 262, "cy": 298, "scale": 0.9 },
   "palette": {
-    "body": "#f6f0da",
-    "face": "#e7d8bf",
-    "ink": "#161616",
+    "wool": "#fbfbf9",
+    "face": "#d7d7da",
+    "ear": "#c7c8cc",
+    "ink": "#23283a",
+    "hi": "#ffffff",
     "field": "#6d4aff",
     "disc": "#8f76ff",
     "deep": "#5636e0",
-    "accent": "#ffd23f",
-    "accentDark": "#e0a80f"
+    "accent": "#ffd23f"
   },
   "parts": [
     { "id": "field", "type": "rect", "x": 0, "y": 0, "w": 400, "h": 400, "fill": "field" },
-    { "id": "woolBody", "type": "ellipse", "silhouette": true, "cx": 252, "cy": 486, "rx": 162, "ry": 150, "fill": "body" },
-    { "id": "wool0", "type": "ellipse", "silhouette": true, "cx": 256, "cy": 290, "rx": 128, "ry": 118, "fill": "body" },
-    { "id": "wool1", "type": "circle", "silhouette": true, "cx": 182, "cy": 200, "r": 48, "fill": "body" },
-    { "id": "wool2", "type": "circle", "silhouette": true, "cx": 256, "cy": 174, "r": 52, "fill": "body" },
-    { "id": "wool3", "type": "circle", "silhouette": true, "cx": 330, "cy": 200, "r": 48, "fill": "body" },
-    { "id": "wool4", "type": "circle", "silhouette": true, "cx": 146, "cy": 272, "r": 46, "fill": "body" },
-    { "id": "wool5", "type": "circle", "silhouette": true, "cx": 366, "cy": 272, "r": 46, "fill": "body" },
-    { "id": "wool6", "type": "circle", "silhouette": true, "cx": 190, "cy": 356, "r": 46, "fill": "body" },
-    { "id": "wool7", "type": "circle", "silhouette": true, "cx": 322, "cy": 356, "r": 46, "fill": "body" },
-    { "id": "earL", "type": "ellipse", "silhouette": true, "cx": 150, "cy": 306, "rx": 26, "ry": 15, "rotate": 24, "fill": "face" },
-    { "id": "earR", "type": "ellipse", "silhouette": true, "cx": 362, "cy": 306, "rx": 26, "ry": 15, "rotate": -24, "fill": "face" },
-    { "id": "faceO", "type": "ellipse", "cx": 258, "cy": 296, "rx": 114, "ry": 106, "fill": "face" },
-    { "id": "forelock", "type": "circle", "cx": 258, "cy": 210, "r": 30, "fill": "body" },
-    { "id": "eyeL", "type": "ellipse", "cx": 216, "cy": 288, "rx": 14.5, "ry": 24, "fill": "ink" },
-    { "id": "eyeR", "type": "ellipse", "cx": 326, "cy": 280, "rx": 14.5, "ry": 24, "fill": "ink" },
-    { "id": "nose", "type": "ellipse", "cx": 272, "cy": 310, "rx": 11, "ry": 8.4, "fill": "ink" },
-    { "id": "mouth", "type": "path", "d": "M256 328 Q272 347 288 328", "fill": "none", "stroke": "ink", "strokeWidth": 7.5 }
+    { "id": "woolBody", "type": "ellipse", "silhouette": true, "cx": 250, "cy": 488, "rx": 170, "ry": 150, "fill": "wool" },
+    { "id": "earL", "type": "ellipse", "silhouette": true, "cx": 150, "cy": 316, "rx": 32, "ry": 22, "rotate": 22, "fill": "ear" },
+    { "id": "earR", "type": "ellipse", "silhouette": true, "cx": 372, "cy": 300, "rx": 32, "ry": 22, "rotate": -22, "fill": "ear" },
+    { "id": "wool0", "type": "ellipse", "silhouette": true, "cx": 256, "cy": 284, "rx": 138, "ry": 126, "fill": "wool" },
+    { "id": "wool1", "type": "circle", "silhouette": true, "cx": 178, "cy": 196, "r": 60, "fill": "wool" },
+    { "id": "wool2", "type": "circle", "silhouette": true, "cx": 264, "cy": 158, "r": 66, "fill": "wool" },
+    { "id": "wool3", "type": "circle", "silhouette": true, "cx": 350, "cy": 200, "r": 58, "fill": "wool" },
+    { "id": "wool4", "type": "circle", "silhouette": true, "cx": 144, "cy": 280, "r": 52, "fill": "wool" },
+    { "id": "wool5", "type": "circle", "silhouette": true, "cx": 372, "cy": 286, "r": 52, "fill": "wool" },
+    { "id": "faceO", "type": "ellipse", "cx": 268, "cy": 306, "rx": 112, "ry": 102, "fill": "face" },
+    { "id": "eyeL", "type": "ellipse", "cx": 240, "cy": 302, "rx": 16, "ry": 21, "fill": "ink" },
+    { "id": "eyeR", "type": "ellipse", "cx": 326, "cy": 292, "rx": 16, "ry": 21, "fill": "ink" },
+    { "id": "hiL", "type": "circle", "cx": 246, "cy": 294, "r": 5, "fill": "hi" },
+    { "id": "hiR", "type": "circle", "cx": 332, "cy": 284, "r": 5, "fill": "hi" },
+    { "id": "mouth", "type": "path", "d": "M262 330 Q278 346 294 330", "fill": "none", "stroke": "ink", "strokeWidth": 7 }
   ],
   "expressions": {
     "happy": {},
     "content": {
-      "eyeL": { "type": "path", "d": "M203 293 q13 -15 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
-      "eyeR": { "type": "path", "d": "M313 285 q13 -15 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null }
+      "eyeL": { "type": "path", "d": "M226 306 q14 -15 28 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
+      "eyeR": { "type": "path", "d": "M312 296 q14 -15 28 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
+      "hiL": { "fill": null }, "hiR": { "fill": null }
     },
     "surprised": {
-      "eyeL": { "ry": 27 },
-      "eyeR": { "ry": 27 },
-      "mouth": { "type": "ellipse", "cx": 272, "cy": 332, "rx": 9, "ry": 11, "fill": "ink", "stroke": null, "strokeWidth": null, "d": null }
+      "eyeL": { "ry": 24 }, "eyeR": { "ry": 24 },
+      "mouth": { "type": "ellipse", "cx": 278, "cy": 334, "rx": 9, "ry": 11, "fill": "ink", "stroke": null, "strokeWidth": null, "d": null }
     },
     "sleepy": {
-      "eyeL": { "type": "path", "d": "M202 288 q14 13 28 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
-      "eyeR": { "type": "path", "d": "M312 280 q14 13 28 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null }
+      "eyeL": { "type": "path", "d": "M226 302 q14 13 28 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
+      "eyeR": { "type": "path", "d": "M312 292 q14 13 28 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
+      "hiL": { "fill": null }, "hiR": { "fill": null }
     },
     "wink": {
-      "eyeL": { "type": "path", "d": "M202 288 q14 13 28 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null }
+      "eyeL": { "type": "path", "d": "M226 302 q14 13 28 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
+      "hiL": { "fill": null }
     }
   },
   "accessories": {
-    "glasses": [
-      { "type": "circle", "cx": 216, "cy": 288, "r": 25, "fill": "none", "stroke": "ink", "strokeWidth": 6 },
-      { "type": "circle", "cx": 326, "cy": 280, "r": 25, "fill": "none", "stroke": "ink", "strokeWidth": 6 },
-      { "type": "path", "d": "M241 285 h60", "fill": "none", "stroke": "ink", "strokeWidth": 6 }
-    ],
     "headset": [
-      { "type": "path", "d": "M150 300 Q256 150 362 300", "fill": "none", "stroke": "ink", "strokeWidth": 9 },
-      { "type": "rect", "x": 132, "y": 292, "w": 30, "h": 44, "rx": 12, "fill": "accent" },
-      { "type": "rect", "x": 350, "y": 292, "w": 30, "h": 44, "rx": 12, "fill": "accent" }
+      { "type": "path", "d": "M150 300 Q268 150 386 300", "fill": "none", "stroke": "ink", "strokeWidth": 9 },
+      { "type": "rect", "x": 134, "y": 292, "w": 28, "h": 42, "rx": 12, "fill": "accent" },
+      { "type": "rect", "x": 372, "y": 292, "w": 28, "h": 42, "rx": 12, "fill": "accent" }
     ]
   },
   "animations": {

@@ -1,77 +1,87 @@
 {
   "name": "blogbat",
   "viewBox": [0, 0, 400, 400],
-  "tilt": -4,
-  "focus": { "cx": 256, "cy": 292, "scale": 0.86 },
+  "tilt": -3,
+  "focus": { "cx": 256, "cy": 250, "scale": 0.78 },
   "palette": {
-    "body": "#f6f0da",
-    "ink": "#161616",
+    "body": "#241a3d",
+    "membrane": "#c9bbff",
+    "ink": "#241a3d",
+    "hi": "#ffffff",
     "field": "#6d4aff",
     "disc": "#8f76ff",
     "deep": "#5636e0",
-    "night": "#1a1420",
-    "accent": "#ffd23f",
-    "accentDark": "#e0a80f"
+    "accent": "#ffd23f"
   },
   "parts": [
     { "id": "field", "type": "rect", "x": 0, "y": 0, "w": 400, "h": 400, "fill": "field" },
-    { "id": "wingL", "type": "path", "silhouette": true, "fill": "body", "cx": 150, "cy": 330,
-      "d": "M150 330 C110 320 96 356 104 386 C120 372 128 384 140 392 C150 360 176 350 196 356 C182 344 168 334 150 330 Z" },
-    { "id": "wingR", "type": "path", "silhouette": true, "fill": "body", "cx": 362, "cy": 330,
-      "d": "M362 330 C402 320 416 356 408 386 C392 372 384 384 372 392 C362 360 336 350 316 356 C330 344 344 334 362 330 Z" },
+
+    { "id": "wingL", "type": "path", "silhouette": true, "fill": "body",
+      "d": "M198 292 C112 250 40 190 28 96 C56 150 92 182 128 194 C102 220 128 258 158 268 C130 292 160 330 192 336 C196 320 197 304 198 292 Z" },
+    { "id": "wingLm", "type": "path", "fill": "membrane",
+      "d": "M196 296 C124 258 62 204 52 122 C78 166 108 192 138 202 C118 224 140 256 166 266 C144 286 170 318 194 322 C196 312 196 302 196 296 Z" },
+    { "id": "wingR", "type": "path", "silhouette": true, "fill": "body",
+      "d": "M314 292 C400 250 472 190 484 96 C456 150 420 182 384 194 C410 220 384 258 354 268 C382 292 352 330 320 336 C316 320 315 304 314 292 Z" },
+    { "id": "wingRm", "type": "path", "fill": "membrane",
+      "d": "M316 296 C388 258 450 204 460 122 C434 166 404 192 374 202 C394 224 372 256 346 266 C368 286 342 318 318 322 C316 312 316 302 316 296 Z" },
+
     { "id": "earL", "type": "path", "silhouette": true, "fill": "body",
-      "d": "M188 206 L206 82 Q212 72 220 84 L276 196 Q234 212 188 206 Z" },
+      "d": "M196 180 L206 74 Q214 62 224 76 L268 176 Q232 190 196 180 Z" },
     { "id": "earR", "type": "path", "silhouette": true, "fill": "body",
-      "d": "M324 206 L306 82 Q300 72 292 84 L236 196 Q278 212 324 206 Z" },
-    { "id": "innerL", "type": "path", "fill": "accent",
-      "d": "M206 198 L214 108 Q218 100 223 110 L256 188 Q228 202 206 198 Z" },
-    { "id": "innerR", "type": "path", "fill": "accent",
-      "d": "M306 198 L298 108 Q294 100 289 110 L256 188 Q284 202 306 198 Z" },
-    { "id": "head", "type": "ellipse", "silhouette": true, "cx": 256, "cy": 292, "rx": 130, "ry": 116, "fill": "body" },
-    { "id": "body", "type": "ellipse", "silhouette": true, "cx": 252, "cy": 470, "rx": 150, "ry": 132, "fill": "body" },
-    { "id": "eyeL", "type": "ellipse", "cx": 216, "cy": 284, "rx": 15, "ry": 24, "fill": "ink" },
-    { "id": "eyeR", "type": "ellipse", "cx": 326, "cy": 276, "rx": 15, "ry": 24, "fill": "ink" },
-    { "id": "nose", "type": "ellipse", "cx": 272, "cy": 306, "rx": 11, "ry": 8.4, "fill": "ink" },
-    { "id": "mouth", "type": "path", "d": "M256 322 Q272 341 288 322", "fill": "none", "stroke": "ink", "strokeWidth": 7.5 },
-    { "id": "fangL", "type": "path", "d": "M261 330 L270 330 L265.5 346 Z", "fill": "#ffffff" },
-    { "id": "fangR", "type": "path", "d": "M276 330 L285 330 L280.5 346 Z", "fill": "#ffffff" }
+      "d": "M316 180 L306 74 Q298 62 288 76 L244 176 Q280 190 316 180 Z" },
+    { "id": "innerL", "type": "path", "fill": "membrane",
+      "d": "M206 172 L214 98 Q219 90 224 100 L252 168 Q228 178 206 172 Z" },
+    { "id": "innerR", "type": "path", "fill": "membrane",
+      "d": "M306 172 L298 98 Q293 90 288 100 L260 168 Q284 178 306 172 Z" },
+
+    { "id": "head", "type": "ellipse", "silhouette": true, "cx": 256, "cy": 250, "rx": 116, "ry": 104, "fill": "body" },
+    { "id": "body", "type": "ellipse", "silhouette": true, "cx": 252, "cy": 430, "rx": 138, "ry": 128, "fill": "body" },
+
+    { "id": "eyeWL", "type": "ellipse", "cx": 218, "cy": 244, "rx": 24, "ry": 27, "fill": "membrane" },
+    { "id": "eyeWR", "type": "ellipse", "cx": 300, "cy": 240, "rx": 24, "ry": 27, "fill": "membrane" },
+    { "id": "eyeL", "type": "ellipse", "cx": 224, "cy": 248, "rx": 11, "ry": 13, "fill": "ink" },
+    { "id": "eyeR", "type": "ellipse", "cx": 294, "cy": 244, "rx": 11, "ry": 13, "fill": "ink" },
+    { "id": "hiL", "type": "circle", "cx": 228, "cy": 243, "r": 4, "fill": "hi" },
+    { "id": "hiR", "type": "circle", "cx": 298, "cy": 239, "r": 4, "fill": "hi" },
+    { "id": "snout", "type": "ellipse", "cx": 259, "cy": 276, "rx": 22, "ry": 16, "fill": "membrane" },
+    { "id": "nostrilL", "type": "ellipse", "cx": 252, "cy": 276, "rx": 3, "ry": 4, "fill": "ink" },
+    { "id": "nostrilR", "type": "ellipse", "cx": 266, "cy": 276, "rx": 3, "ry": 4, "fill": "ink" },
+    { "id": "mouth", "type": "path", "d": "M244 292 Q259 304 274 292", "fill": "none", "stroke": "membrane", "strokeWidth": 6 },
+    { "id": "fang", "type": "path", "d": "M264 300 L272 300 L268 312 Z", "fill": "hi" }
   ],
   "expressions": {
     "happy": {},
     "content": {
-      "eyeL": { "type": "path", "d": "M203 289 q13 -15 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
-      "eyeR": { "type": "path", "d": "M313 281 q13 -15 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null }
+      "eyeL": { "type": "path", "d": "M211 248 q13 -14 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 6, "cx": null, "cy": null, "rx": null, "ry": null },
+      "eyeR": { "type": "path", "d": "M281 244 q13 -14 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 6, "cx": null, "cy": null, "rx": null, "ry": null },
+      "hiL": { "fill": null }, "hiR": { "fill": null }
     },
     "surprised": {
-      "eyeL": { "ry": 27 },
-      "eyeR": { "ry": 27 },
-      "mouth": { "type": "ellipse", "cx": 272, "cy": 326, "rx": 9, "ry": 11, "fill": "ink", "stroke": null, "strokeWidth": null, "d": null }
+      "eyeL": { "ry": 16 }, "eyeR": { "ry": 16 },
+      "mouth": { "type": "ellipse", "cx": 259, "cy": 298, "rx": 8, "ry": 10, "fill": "membrane", "stroke": null, "strokeWidth": null, "d": null }
     },
     "sleepy": {
-      "eyeL": { "type": "path", "d": "M202 284 q15 13 30 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null },
-      "eyeR": { "type": "path", "d": "M311 276 q15 13 30 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null }
+      "eyeL": { "type": "path", "d": "M211 246 q13 11 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 6, "cx": null, "cy": null, "rx": null, "ry": null },
+      "eyeR": { "type": "path", "d": "M281 242 q13 11 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 6, "cx": null, "cy": null, "rx": null, "ry": null },
+      "hiL": { "fill": null }, "hiR": { "fill": null }
     },
     "wink": {
-      "eyeL": { "type": "path", "d": "M202 284 q15 13 30 0", "fill": "none", "stroke": "ink", "strokeWidth": 7, "cx": null, "cy": null, "rx": null, "ry": null }
+      "eyeL": { "type": "path", "d": "M211 246 q13 11 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 6, "cx": null, "cy": null, "rx": null, "ry": null },
+      "hiL": { "fill": null }
     }
   },
   "accessories": {
-    "glasses": [
-      { "type": "circle", "cx": 216, "cy": 284, "r": 26, "fill": "none", "stroke": "ink", "strokeWidth": 6 },
-      { "type": "circle", "cx": 326, "cy": 276, "r": 26, "fill": "none", "stroke": "ink", "strokeWidth": 6 },
-      { "type": "path", "d": "M242 281 h58", "fill": "none", "stroke": "ink", "strokeWidth": 6 }
-    ],
     "moon": [
-      { "type": "circle", "cx": 92, "cy": 96, "r": 40, "fill": "accent" },
-      { "type": "circle", "cx": 108, "cy": 88, "r": 34, "fill": "field" }
+      { "type": "circle", "cx": 86, "cy": 300, "r": 34, "fill": "accent" },
+      { "type": "circle", "cx": 100, "cy": 292, "r": 28, "fill": "field" }
     ]
   },
   "animations": {
     "idle": {
       "loop": true,
       "tracks": [
-        { "target": "body", "property": "translateY", "keys": [[0, 0], [1.3, -3], [2.6, 0]] },
-        { "target": ["wingL", "wingR"], "property": "rotate", "keys": [[0, -3], [1.1, 3], [2.2, -3]] },
+        { "target": ["head", "body"], "property": "translateY", "keys": [[0, 0], [1.3, -2.5], [2.6, 0]] },
+        { "target": ["wingL", "wingLm", "wingR", "wingRm"], "property": "rotate", "keys": [[0, -4], [1.0, 4], [2.0, -4]] },
         { "target": ["eyeL", "eyeR"], "property": "scaleY", "keys": [[0, 1], [3.9, 1], [4.05, 0.1], [4.2, 1]] }
       ]
     }

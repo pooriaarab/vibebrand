@@ -46,7 +46,7 @@ button.opt.on{background:var(--accent,#7857ed);color:#fff;border-color:transpare
 <section><h2>Idle animation</h2><div class="grid"><div class="card"><div id="idle"></div><div class="cap">CSS idle · no runtime</div></div></div></section>
 <div class="foot">vibebrand mascot system · edit the <code>.avatar.json</code>, everything here updates. Swap the silhouette parts for a new animal; the rest comes free.</div>
 <script type="module">
-const BRANDS=[['rabbit','Content Rabbit'],['bat','BlogBat'],['sheep','Supportsheep']];
+const BRANDS=[['rabbit','Content Rabbit'],['bat','BlogBat'],['sheep','Supportsheep'],['chameleon','ReplytoSocial']];
 const b=new URLSearchParams(location.search).get('b')||'rabbit';
 document.getElementById('tabs').innerHTML=BRANDS.map(([id,n])=>`<a class="tab${id===b?' on':''}" href="?b=${id}">${n}</a>`).join('');
 try{
