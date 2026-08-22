@@ -95,8 +95,13 @@ function outlineLayer(parts, pal, focus, colorHex, amount = 0.045) {
 }
 
 // ---- avatar -----------------------------------------------------------------
+// opts beyond the spec: expression, accessory, field, size, outline, showField,
+//   headTurn (-1..1) — shift ONLY the non-silhouette feature parts (eyes, nose,
+//     mouth, highlights…) ±18px on x, so the head reads as glancing sideways;
+//   flip (bool) — mirror the whole character horizontally about the viewBox
+//     center (wraps the tilt group in scale(-1,1)). Both default to no-ops.
 export function renderAvatar(spec, opts = {}) {
-  const { expression, accessory, field = "field", size = 240, outline = null, showField = true } = opts;
+  const { expression, accessory, field = "field", size = 240, outline = null, showField = true, headTurn = 0, flip = false } = opts;
   const pal = { ...spec.palette, field: spec.palette[field] || spec.palette.field };
   const [x0, y0, w, h] = spec.viewBox;
   const vb = spec.viewBox.join(" ");
@@ -106,11 +111,16 @@ export function renderAvatar(spec, opts = {}) {
   const acc = (spec.accessories?.[accessory] || []).map(p => renderPart(p, pal)).join("");
   const back = showField && fieldPart ? renderPart(fieldPart, pal) : "";
   const ol = outline ? outlineLayer(rest, pal, spec.focus, outline) : "";
-  const body = rest.map(p => renderPart(p, pal)).join("");
+  const dx = Math.round(Math.max(-1, Math.min(1, +headTurn || 0)) * 18 * 100) / 100;
+  const body = rest.map(p => {
+    const el = renderPart(p, pal);
+    return dx && !p.silhouette ? `<g transform="translate(${esc(dx)} 0)">${el}</g>` : el;
+  }).join("");
   const tilt = spec.tilt
     ? `<g transform="rotate(${spec.tilt} ${spec.focus?.cx ?? x0 + w / 2} ${spec.focus?.cy ?? y0 + h / 2})">${ol}${body}${acc}</g>`
     : `${ol}${body}${acc}`;
-  return `<svg width="${size}" height="${size}" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${back}${tilt}</svg>`;
+  const char = flip ? `<g transform="translate(${esc(2 * x0 + w)} 0) scale(-1 1)">${tilt}</g>` : tilt;
+  return `<svg width="${size}" height="${size}" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${back}${char}</svg>`;
 }
 
 // ---- favicon / app tile: SAME geometry, framed on the head, clipped ---------

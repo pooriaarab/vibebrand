@@ -68,6 +68,21 @@
     "wink": {
       "eyeL": { "type": "path", "d": "M211 246 q13 11 26 0", "fill": "none", "stroke": "ink", "strokeWidth": 6, "cx": null, "cy": null, "rx": null, "ry": null },
       "hiL": { "fill": null }
+    },
+    "excited": {
+      "eyeL": { "rx": 13.5, "ry": 16 },
+      "eyeR": { "rx": 13.5, "ry": 16 },
+      "mouth": { "type": "ellipse", "cx": 259, "cy": 298, "rx": 13, "ry": 11, "fill": "membrane", "stroke": null, "strokeWidth": null, "d": null }
+    },
+    "sad": {
+      "eyeL": { "type": "path", "d": "M211 252 q13 -11 26 -6", "fill": "none", "stroke": "ink", "strokeWidth": 6, "cx": null, "cy": null, "rx": null, "ry": null },
+      "eyeR": { "type": "path", "d": "M281 240 q13 -7 26 6", "fill": "none", "stroke": "ink", "strokeWidth": 6, "cx": null, "cy": null, "rx": null, "ry": null },
+      "hiL": { "fill": null }, "hiR": { "fill": null },
+      "mouth": { "d": "M244 302 Q259 288 274 302" }
+    },
+    "skeptical": {
+      "eyeR": { "ry": 6.5 },
+      "mouth": { "d": "M247 296 H271" }
     }
   },
   "accessories": {
