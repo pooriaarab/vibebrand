@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>vibebrand · mascot lab</title>
+<style>
+:root{--ink:#161616;--muted:#6b6580;--line:#eae7f5;--paper:#faf9ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--paper);line-height:1.5}
+header{max-width:1080px;margin:0 auto;padding:48px 28px 8px}
+h1{font-size:32px;font-weight:800;letter-spacing:-.02em;margin:0 0 4px}
+.lead{color:var(--muted);max-width:640px}
+.tabs{max-width:1080px;margin:14px auto 0;padding:0 28px;display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:600 14px system-ui;padding:7px 15px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);text-decoration:none}
+.tab.on{background:var(--accent,#7857ed);color:#fff;border-color:transparent}
+section{max-width:1080px;margin:0 auto;padding:30px 28px;border-top:1px solid var(--line)}
+h2{font:700 12px system-ui;text-transform:uppercase;letter-spacing:.09em;color:var(--accent,#7857ed);margin:0 0 12px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.lbl{font-size:12px;color:var(--muted);margin-right:4px}
+button.opt{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font:600 13px system-ui;cursor:pointer;color:var(--ink)}
+button.opt.on{background:var(--accent,#7857ed);color:#fff;border-color:transparent}
+.stage{background:#f4f2fd;border-radius:20px;padding:26px;display:flex;justify-content:center;min-height:240px;align-items:center}
+.grid{display:flex;gap:14px;flex-wrap:wrap}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.cap{font-size:12px;font-weight:600;margin-top:6px}.sub{font-size:11px;color:var(--muted)}
+.modes{display:flex;gap:18px}.modes .card{flex:1}
+.foot{max-width:1080px;margin:0 auto;padding:28px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+#err{color:#c00;font:12px monospace;white-space:pre-wrap;padding:0 28px}
+</style></head>
+<body>
+<header><h1 id="brandName">mascot lab</h1><p class="lead">One <code>.avatar.json</code> → avatar, favicon, expressions, accessories, light/dark, idle. Rendered live by <code>engine.js</code>.</p></header>
+<div class="tabs" id="tabs"></div>
+<div id="err"></div>
+<section><h2>Character</h2>
+  <div class="controls" id="cExpr"></div>
+  <div class="controls" id="cAcc"></div>
+  <div class="controls" id="cField"></div>
+  <div class="controls" id="cOut"></div>
+  <div class="stage"><div id="hero"></div></div>
+</section>
+<section><h2>Expressions</h2><div class="grid" id="sheet"></div></section>
+<section><h2>Favicon / app tile</h2><div class="grid" id="tiles"></div></section>
+<section><h2>Accessories</h2><div class="grid" id="accs"></div></section>
+<section><h2>Light &amp; dark</h2>
+  <p class="sub" style="margin:-6px 0 14px">No body outline → bare disappears on a same-value page. Use the tile/disc (self-contained) or a brand-color outline.</p>
+  <div class="modes"><div class="card" style="background:#fff"><div class="sub">Light page</div><div class="grid" style="justify-content:center" id="mLight"></div></div>
+  <div class="card" style="background:#0f0e14"><div class="sub" style="color:#b9b3cc">Dark page</div><div class="grid" style="justify-content:center" id="mDark"></div></div></div>
+</section>
+<section><h2>Idle animation</h2><div class="grid"><div class="card"><div id="idle"></div><div class="cap">CSS idle · no runtime</div></div></div></section>
+<div class="foot">vibebrand mascot system · edit the <code>.avatar.json</code>, everything here updates. Swap the silhouette parts for a new animal; the rest comes free.</div>
+<script type="module">
+const BRANDS=[['rabbit','Content Rabbit'],['bat','BlogBat'],['sheep','Supportsheep']];
+const b=new URLSearchParams(location.search).get('b')||'rabbit';
+document.getElementById('tabs').innerHTML=BRANDS.map(([id,n])=>`<a class="tab${id===b?' on':''}" href="?b=${id}">${n}</a>`).join('');
+try{
+  const eng=await import('./engine.js');
+  const spec=await fetch(`./${b}.avatar.json`).then(r=>{if(!r.ok)throw new Error(b+'.avatar.json not found');return r.json();});
+  const accent=spec.palette.field; document.documentElement.style.setProperty('--accent',accent);
+  document.getElementById('brandName').textContent=(spec.name||b)+' · mascot lab';
+  const fields=Object.keys(spec.palette).filter(k=>!['body','ink','accent','accentDark'].includes(k));
+  const exprs=eng.expressionNames(spec);
+  const accsList=['none',...Object.keys(spec.accessories||{})];
+  const st={expression:exprs[0],accessory:'none',field:fields.includes('field')?'field':fields[0],outline:null};
+  const card=(svg,cap,sub)=>`<div class="card"><div>${svg}</div>${cap?`<div class="cap">${cap}</div>`:''}${sub?`<div class="sub">${sub}</div>`:''}</div>`;
+  const btns=(id,items,keyAttr,active,cb)=>{const el=document.getElementById(id);
+    el.innerHTML=`<span class="lbl">${keyAttr}:</span>`+items.map(([v,l])=>`<button class="opt${v===active?' on':''}" data-v="${v}">${l}</button>`).join('');
+    el.onclick=e=>{if(!e.target.dataset.v)return;[...el.querySelectorAll('button')].forEach(c=>c.classList.toggle('on',c===e.target));cb(e.target.dataset.v);};};
+  const hero=()=>document.getElementById('hero').innerHTML=eng.renderAvatar(spec,{expression:st.expression,accessory:st.accessory==='none'?null:st.accessory,field:st.field,outline:st.outline,showField:st.outline?false:true,size:240});
+  btns('cExpr',exprs.map(e=>[e,e]),'expression',st.expression,v=>{st.expression=v;hero();});
+  btns('cAcc',accsList.map(a=>[a,a]),'accessory',st.accessory,v=>{st.accessory=v;hero();});
+  btns('cField',fields.map(f=>[f,f]),'field',st.field,v=>{st.field=v;hero();});
+  btns('cOut',[['off','off'],['on','brand outline']],'outline','off',v=>{st.outline=v==='on'?spec.palette.field:null;hero();});
+  hero();
+  document.getElementById('sheet').innerHTML=exprs.map(e=>card(eng.renderAvatar(spec,{expression:e,field:'disc'in spec.palette?'disc':st.field,size:92}),e)).join('');
+  document.getElementById('tiles').innerHTML=[16,24,32,48,64,120].map(s=>card(eng.renderTile(spec,{size:s,shape:'round'}),'',s+'px')).join('')+card(eng.renderTile(spec,{size:96,shape:'circle'}),'','circle');
+  document.getElementById('accs').innerHTML=(Object.keys(spec.accessories||{}).length?Object.keys(spec.accessories):['—']).map(a=>a==='—'?card(eng.renderAvatar(spec,{size:92}),'no accessories'):card(eng.renderAvatar(spec,{accessory:a,size:92}),a)).join('');
+  const modeSet=()=>[['tile',eng.renderTile(spec,{size:72,shape:'round'})],['on disc',eng.renderAvatar(spec,{size:72,field:'disc'in spec.palette?'disc':st.field})],['bare',eng.renderAvatar(spec,{size:72,showField:false})],['outline',eng.renderAvatar(spec,{size:72,showField:false,outline:spec.palette.field})]].map(([l,s])=>card(s,'',l)).join('');
+  document.getElementById('mLight').innerHTML=modeSet();document.getElementById('mDark').innerHTML=modeSet();
+  document.getElementById('idle').innerHTML=eng.renderIdle(spec,{size:150});
+}catch(e){document.getElementById('err').textContent='ERROR: '+e.message+'\n'+(e.stack||'');}
+</script>
+</body></html>
