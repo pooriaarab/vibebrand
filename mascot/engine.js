@@ -29,16 +29,23 @@
 
 let _cid = 0;
 
-const color = (pal, key) => (key && pal[key]) ? pal[key] : (key || "none");
+// Specs are data that may come from an LLM/agent or an untrusted source, and
+// their string values are interpolated straight into SVG/CSS/HTML (e.g. by
+// brand-lab.html's innerHTML). Escape every spec-derived value used inside a
+// markup attribute or text node to prevent it breaking out into new markup.
+const ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+const esc = v => String(v).replace(/[&<>"']/g, c => ESCAPE_MAP[c]);
+
+const color = (pal, key) => esc((key && pal[key]) ? pal[key] : (key || "none"));
 
 function attrRotate(p) {
-  return p.rotate ? ` transform="rotate(${p.rotate} ${p.cx ?? 0} ${p.cy ?? 0})"` : "";
+  return p.rotate ? ` transform="rotate(${esc(p.rotate)} ${esc(p.cx ?? 0)} ${esc(p.cy ?? 0)})"` : "";
 }
 function attrStroke(pal, p) {
   const s = p.stroke && pal[p.stroke] ? pal[p.stroke] : p.stroke;
   if (!s || s === "none") return "";
-  return ` stroke="${s}" stroke-linecap="round" stroke-linejoin="round"` +
-         (p.strokeWidth ? ` stroke-width="${p.strokeWidth}"` : "");
+  return ` stroke="${esc(s)}" stroke-linecap="round" stroke-linejoin="round"` +
+         (p.strokeWidth ? ` stroke-width="${esc(p.strokeWidth)}"` : "");
 }
 
 // Render one part to an SVG element string.
@@ -47,18 +54,18 @@ export function renderPart(p, pal) {
   const st = attrStroke(pal, p), rot = attrRotate(p);
   switch (p.type) {
     case "rect":
-      return `<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}"` +
-        (p.rx != null ? ` rx="${p.rx}"` : "") + ` fill="${fill}"${st}${rot}/>`;
+      return `<rect x="${esc(p.x)}" y="${esc(p.y)}" width="${esc(p.w)}" height="${esc(p.h)}"` +
+        (p.rx != null ? ` rx="${esc(p.rx)}"` : "") + ` fill="${fill}"${st}${rot}/>`;
     case "ellipse":
-      return `<ellipse cx="${p.cx}" cy="${p.cy}" rx="${p.rx}" ry="${p.ry}" fill="${fill}"${st}${rot}/>`;
+      return `<ellipse cx="${esc(p.cx)}" cy="${esc(p.cy)}" rx="${esc(p.rx)}" ry="${esc(p.ry)}" fill="${fill}"${st}${rot}/>`;
     case "circle":
-      return `<circle cx="${p.cx}" cy="${p.cy}" r="${p.r}" fill="${fill}"${st}${rot}/>`;
+      return `<circle cx="${esc(p.cx)}" cy="${esc(p.cy)}" r="${esc(p.r)}" fill="${fill}"${st}${rot}/>`;
     case "path":
-      return `<path d="${p.d}" fill="${fill}"${st}${rot}/>`;
+      return `<path d="${esc(p.d)}" fill="${fill}"${st}${rot}/>`;
     case "text":
-      return `<text x="${p.x}" y="${p.y}" font-size="${p.size}"` +
-        (p.weight ? ` font-weight="${p.weight}"` : "") +
-        (p.italic ? ` font-style="italic"` : "") + ` fill="${fill}"${st}${rot}>${p.text}</text>`;
+      return `<text x="${esc(p.x)}" y="${esc(p.y)}" font-size="${esc(p.size)}"` +
+        (p.weight ? ` font-weight="${esc(p.weight)}"` : "") +
+        (p.italic ? ` font-style="italic"` : "") + ` fill="${fill}"${st}${rot}>${esc(p.text)}</text>`;
     default:
       return "";
   }
@@ -91,6 +98,7 @@ function outlineLayer(parts, pal, focus, colorHex, amount = 0.045) {
 export function renderAvatar(spec, opts = {}) {
   const { expression, accessory, field = "field", size = 240, outline = null, showField = true } = opts;
   const pal = { ...spec.palette, field: spec.palette[field] || spec.palette.field };
+  const [x0, y0, w, h] = spec.viewBox;
   const vb = spec.viewBox.join(" ");
   const parts = applyExpression(spec.parts, spec.expressions?.[expression]);
   const fieldPart = parts.find(p => p.id === "field");
@@ -100,7 +108,7 @@ export function renderAvatar(spec, opts = {}) {
   const ol = outline ? outlineLayer(rest, pal, spec.focus, outline) : "";
   const body = rest.map(p => renderPart(p, pal)).join("");
   const tilt = spec.tilt
-    ? `<g transform="rotate(${spec.tilt} ${spec.focus?.cx ?? 200} ${spec.focus?.cy ?? 200})">${ol}${body}${acc}</g>`
+    ? `<g transform="rotate(${spec.tilt} ${spec.focus?.cx ?? x0 + w / 2} ${spec.focus?.cy ?? y0 + h / 2})">${ol}${body}${acc}</g>`
     : `${ol}${body}${acc}`;
   return `<svg width="${size}" height="${size}" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${back}${tilt}</svg>`;
 }
@@ -110,8 +118,8 @@ export function renderAvatar(spec, opts = {}) {
 export function renderTile(spec, opts = {}) {
   const { size = 64, shape = "round", radius = 0.23, field = "field", bg } = opts;
   const id = "m" + (_cid++);
-  const [, , w, h] = spec.viewBox;
-  const f = spec.focus || { cx: w / 2, cy: h / 2, scale: 0.9 };
+  const [x0, y0, w, h] = spec.viewBox;
+  const f = spec.focus || { cx: x0 + w / 2, cy: y0 + h / 2, scale: 0.9 };
   const s = f.scale ?? 0.9, cx = w / 2, cy = h * 0.52;
   const fill = bg || spec.palette[field] || spec.palette.field;
   const shp = shape === "circle"
@@ -133,7 +141,7 @@ export function expressionNames(spec) { return Object.keys(spec.expressions || {
 export function renderIdle(spec, opts = {}) {
   const { size = 160, field = "field" } = opts;
   const pal = { ...spec.palette, field: spec.palette[field] || spec.palette.field };
-  const [, , w, h] = spec.viewBox;
+  const [x0, y0, w, h] = spec.viewBox;
   const idle = spec.animations?.idle;
   const parts = spec.parts.filter(p => p.id !== "field");
   const fieldPart = spec.parts.find(p => p.id === "field");
@@ -146,8 +154,8 @@ export function renderIdle(spec, opts = {}) {
     const dur = t.keys[t.keys.length - 1][0];
     const frames = t.keys.map(([time, v]) => {
       const pct = (time / dur * 100).toFixed(1);
-      const fn = t.property === "translateY" ? `translateY(${v}${unit})`
-        : t.property === "rotate" ? `rotate(${v}${unit})` : `scaleY(${v})`;
+      const fn = t.property === "translateY" ? `translateY(${esc(v)}${unit})`
+        : t.property === "rotate" ? `rotate(${esc(v)}${unit})` : `scaleY(${esc(v)})`;
       return `${pct}%{transform:${fn}}`;
     }).join("");
     css += `@keyframes ${name}{${frames}}`;
@@ -158,13 +166,13 @@ export function renderIdle(spec, opts = {}) {
     const a = cls[p.id];
     const el = renderPart(p, pal);
     if (!a) return el;
-    const anim = a.map(x => `${x.name} ${x.dur}s ease-in-out ${iter}`).join(",");
-    const ox = p.cx != null ? `${p.cx}px` : "50%", oy = p.cy != null ? `${p.cy}px` : "50%";
-    return `<g class="cr-${p.id}" style="animation:${anim};transform-box:view-box;transform-origin:${ox} ${oy}">${el}</g>`;
+    const anim = a.map(x => `${esc(x.name)} ${esc(x.dur)}s ease-in-out ${iter}`).join(",");
+    const ox = p.cx != null ? `${esc(p.cx)}px` : "50%", oy = p.cy != null ? `${esc(p.cy)}px` : "50%";
+    return `<g class="cr-${esc(p.id)}" style="animation:${anim};transform-box:view-box;transform-origin:${ox} ${oy}">${el}</g>`;
   };
   const body = parts.map(render).join("");
-  const tilt = spec.tilt ? `<g transform="rotate(${spec.tilt} ${spec.focus?.cx ?? w/2} ${spec.focus?.cy ?? h/2})">${body}</g>` : body;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg"><style>${css}</style>` +
+  const tilt = spec.tilt ? `<g transform="rotate(${spec.tilt} ${spec.focus?.cx ?? x0 + w / 2} ${spec.focus?.cy ?? y0 + h / 2})">${body}</g>` : body;
+  return `<svg width="${size}" height="${size}" viewBox="${x0} ${y0} ${w} ${h}" xmlns="http://www.w3.org/2000/svg"><style>${css}</style>` +
     (fieldPart ? renderPart(fieldPart, pal) : "") + tilt + `</svg>`;
 }
 
