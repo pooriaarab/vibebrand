@@ -58,7 +58,7 @@ export function renderPart(p, pal) {
     case "text":
       return `<text x="${p.x}" y="${p.y}" font-size="${p.size}"` +
         (p.weight ? ` font-weight="${p.weight}"` : "") +
-        (p.italic ? ` font-style="italic"` : "") + ` fill="${fill}">${p.text}</text>`;
+        (p.italic ? ` font-style="italic"` : "") + ` fill="${fill}"${st}${rot}>${p.text}</text>`;
     default:
       return "";
   }
@@ -137,10 +137,12 @@ export function renderIdle(spec, opts = {}) {
   const idle = spec.animations?.idle;
   const parts = spec.parts.filter(p => p.id !== "field");
   const fieldPart = spec.parts.find(p => p.id === "field");
+  const iid = "m" + (_cid++); // unique per call, so keyframe names never collide across mascots on one page
+  const iter = idle?.loop === false ? "1" : "infinite";
   const cls = {}; // partId -> [animName...]
   let css = "@media(prefers-reduced-motion:reduce){[class^=cr-]{animation:none!important}}";
   (idle?.tracks || []).forEach((t, i) => {
-    const name = "crk" + i, unit = t.property === "rotate" ? "deg" : t.property === "translateY" ? "%" : "";
+    const name = iid + "k" + i, unit = t.property === "rotate" ? "deg" : t.property === "translateY" ? "%" : "";
     const dur = t.keys[t.keys.length - 1][0];
     const frames = t.keys.map(([time, v]) => {
       const pct = (time / dur * 100).toFixed(1);
@@ -156,8 +158,9 @@ export function renderIdle(spec, opts = {}) {
     const a = cls[p.id];
     const el = renderPart(p, pal);
     if (!a) return el;
-    const anim = a.map(x => `${x.name} ${x.dur}s ease-in-out infinite`).join(",");
-    return `<g class="cr-${p.id}" style="animation:${anim};transform-box:view-box;transform-origin:${p.cx ?? "50%"}px ${p.cy ?? "50%"}px">${el}</g>`;
+    const anim = a.map(x => `${x.name} ${x.dur}s ease-in-out ${iter}`).join(",");
+    const ox = p.cx != null ? `${p.cx}px` : "50%", oy = p.cy != null ? `${p.cy}px` : "50%";
+    return `<g class="cr-${p.id}" style="animation:${anim};transform-box:view-box;transform-origin:${ox} ${oy}">${el}</g>`;
   };
   const body = parts.map(render).join("");
   const tilt = spec.tilt ? `<g transform="rotate(${spec.tilt} ${spec.focus?.cx ?? w/2} ${spec.focus?.cy ?? h/2})">${body}</g>` : body;
