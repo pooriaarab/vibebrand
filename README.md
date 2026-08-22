@@ -49,6 +49,31 @@ npx vibebrand check brutalist   # per-pair ratio + WCAG level
 npx vibebrand check --all       # exits 1 if any pair is below AA
 ```
 
+## Give the brand a face
+
+Tokens dress the UI; a **mascot** gives the brand a character — the thing that
+greets people on an empty state, celebrates a success, and shrugs on a 404. The
+mascot system renders a whole character from one data file:
+
+```js
+import { renderAvatar, renderTile, renderIdle } from "vibebrand/mascot/engine.js";
+import spec from "./rabbit.avatar.json" assert { type: "json" };
+
+renderAvatar(spec, { expression: "happy" }); // hero / illustration
+renderTile(spec, { size: 32 });              // favicon — the same character, never a redraw
+renderIdle(spec);                            // ambient CSS animation, no runtime
+```
+
+One `.avatar.json` drives the avatar, every expression, the favicon at every
+size, accessories, and an idle animation — so nothing drifts when you resize or
+restyle. Swap the silhouette parts for a different animal and the rest comes for
+free: `mascot/rabbit.avatar.json` (Content Rabbit), `bat.avatar.json` (BlogBat),
+and `sheep.avatar.json` (Supportsheep) are the same 200-line engine, three
+characters. Open `mascot/brand-lab.html` to explore any of them live.
+
+Full method — shape language, the three-quarter turn, light/dark, why you draw
+it once — is in [`docs/mascot-system.md`](docs/mascot-system.md).
+
 ## The directions
 
 `signal` · `fanout` · `blueprint` · `anime` · `brutalist` · `aurora` ·
@@ -59,8 +84,10 @@ npx vibebrand check --all       # exits 1 if any pair is below AA
 ## Roadmap
 
 Shipped: Tailwind v4 `@theme` export (`tailwind`), a generative brand mark
-(`logo`), and project scaffolding (`init`). Next:
+(`logo`), project scaffolding (`init`), and the **mascot system** (`mascot/` —
+`.avatar.json` + engine + lab). Next:
 
+- **Mascot CLI** — `vibebrand mascot <spec>` to emit the favicon set + sprite.
 - **Favicon + OG generators** — a favicon set and an OG image per direction.
 - **MCP server** (`vibebrand-mcp`) — drive the generators from any AI agent.
 - **`vibebrand init` → `/brand` page** — also scaffold a live guidelines page.
