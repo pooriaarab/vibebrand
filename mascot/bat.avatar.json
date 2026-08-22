@@ -15,9 +15,9 @@
   },
   "parts": [
     { "id": "field", "type": "rect", "x": 0, "y": 0, "w": 400, "h": 400, "fill": "field" },
-    { "id": "wingL", "type": "path", "silhouette": true, "fill": "body",
+    { "id": "wingL", "type": "path", "silhouette": true, "fill": "body", "cx": 150, "cy": 330,
       "d": "M150 330 C110 320 96 356 104 386 C120 372 128 384 140 392 C150 360 176 350 196 356 C182 344 168 334 150 330 Z" },
-    { "id": "wingR", "type": "path", "silhouette": true, "fill": "body",
+    { "id": "wingR", "type": "path", "silhouette": true, "fill": "body", "cx": 362, "cy": 330,
       "d": "M362 330 C402 320 416 356 408 386 C392 372 384 384 372 392 C362 360 336 350 316 356 C330 344 344 334 362 330 Z" },
     { "id": "earL", "type": "path", "silhouette": true, "fill": "body",
       "d": "M188 206 L206 82 Q212 72 220 84 L276 196 Q234 212 188 206 Z" },

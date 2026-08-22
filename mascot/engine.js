@@ -121,7 +121,7 @@ export function renderTile(spec, opts = {}) {
   const [x0, y0, w, h] = spec.viewBox;
   const f = spec.focus || { cx: x0 + w / 2, cy: y0 + h / 2, scale: 0.9 };
   const s = f.scale ?? 0.9, cx = w / 2, cy = h * 0.52;
-  const fill = bg || spec.palette[field] || spec.palette.field;
+  const fill = esc(bg || spec.palette[field] || spec.palette.field);
   const shp = shape === "circle"
     ? `<circle cx="${w / 2}" cy="${h / 2}" r="${w / 2}"/>`
     : `<rect width="${w}" height="${h}" rx="${w * radius}"/>`;
@@ -150,8 +150,10 @@ export function renderIdle(spec, opts = {}) {
   const cls = {}; // partId -> [animName...]
   let css = "@media(prefers-reduced-motion:reduce){[class^=cr-]{animation:none!important}}";
   (idle?.tracks || []).forEach((t, i) => {
+    if (!t.keys?.length) return;
     const name = iid + "k" + i, unit = t.property === "rotate" ? "deg" : t.property === "translateY" ? "%" : "";
     const dur = t.keys[t.keys.length - 1][0];
+    if (!(dur > 0)) return;
     const frames = t.keys.map(([time, v]) => {
       const pct = (time / dur * 100).toFixed(1);
       const fn = t.property === "translateY" ? `translateY(${esc(v)}${unit})`
