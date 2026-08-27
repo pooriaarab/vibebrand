@@ -37,6 +37,7 @@ const ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'":
 const esc = v => String(v).replace(/[&<>"']/g, c => ESCAPE_MAP[c]);
 
 const color = (pal, key) => esc((key && pal[key]) ? pal[key] : (key || "none"));
+const isSet = v => v !== null && v !== undefined;
 
 function attrRotate(p) {
   return p.rotate ? ` transform="rotate(${esc(p.rotate)} ${esc(p.cx ?? 0)} ${esc(p.cy ?? 0)})"` : "";
@@ -55,7 +56,7 @@ export function renderPart(p, pal) {
   switch (p.type) {
     case "rect":
       return `<rect x="${esc(p.x)}" y="${esc(p.y)}" width="${esc(p.w)}" height="${esc(p.h)}"` +
-        (p.rx != null ? ` rx="${esc(p.rx)}"` : "") + ` fill="${fill}"${st}${rot}/>`;
+        (isSet(p.rx) ? ` rx="${esc(p.rx)}"` : "") + ` fill="${fill}"${st}${rot}/>`;
     case "ellipse":
       return `<ellipse cx="${esc(p.cx)}" cy="${esc(p.cy)}" rx="${esc(p.rx)}" ry="${esc(p.ry)}" fill="${fill}"${st}${rot}/>`;
     case "circle":
@@ -83,15 +84,66 @@ function applyExpression(parts, expr) {
   });
 }
 
+function paletteFor(spec, field) {
+  return { ...spec.palette, field: spec.palette[field] || spec.palette.field };
+}
+function viewBoxOf(spec) {
+  const [x0, y0, w, h] = spec.viewBox;
+  return { x0, y0, w, h, vb: spec.viewBox.join(" ") };
+}
+function splitField(parts) {
+  return { fieldPart: parts.find(p => p.id === "field"), rest: parts.filter(p => p.id !== "field") };
+}
+function paintField(fieldPart, pal, showField = true) {
+  return showField && fieldPart ? renderPart(fieldPart, pal) : "";
+}
+function tiltOrigin(spec, { x0, y0, w, h }) {
+  return { cx: spec.focus?.cx ?? x0 + w / 2, cy: spec.focus?.cy ?? y0 + h / 2 };
+}
+function withTilt(spec, box, inner) {
+  if (!spec.tilt) return inner;
+  const { cx, cy } = tiltOrigin(spec, box);
+  return `<g transform="rotate(${spec.tilt} ${cx} ${cy})">${inner}</g>`;
+}
+function svgAt(size, viewBox, inner) {
+  return `<svg width="${size}" height="${size}" viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+}
+
 // A cheap, generic outline: re-draw the silhouette parts behind, scaled up a
 // touch about the focus point, in one flat color. Works for any animal because
 // it never assumes a shape — it just inflates the silhouette group.
-function outlineLayer(parts, pal, focus, colorHex, amount = 0.045) {
+function outlineLayer({ parts, focus, colorHex, amount = 0.045 }) {
   const sil = parts.filter(p => p.silhouette);
   if (!sil.length) return "";
   const inked = sil.map(p => renderPart({ ...p, fill: "__o", stroke: undefined }, { __o: colorHex })).join("");
   const s = 1 + amount, cx = focus?.cx ?? 200, cy = focus?.cy ?? 200;
   return `<g transform="translate(${cx - s * cx} ${cy - s * cy}) scale(${s})">${inked}</g>`;
+}
+function maybeOutline(parts, focus, outline) {
+  return outline ? outlineLayer({ parts, focus, colorHex: outline }) : "";
+}
+function accessoryParts(spec, accessory, pal) {
+  return (spec.accessories?.[accessory] || []).map(p => renderPart(p, pal)).join("");
+}
+function headTurnX(headTurn) {
+  return Math.round(Math.max(-1, Math.min(1, +headTurn || 0)) * 18 * 100) / 100;
+}
+function paintParts(parts, pal, dx) {
+  return parts.map(p => {
+    const el = renderPart(p, pal);
+    return dx && !p.silhouette ? `<g transform="translate(${esc(dx)} 0)">${el}</g>` : el;
+  }).join("");
+}
+function maybeFlip(flip, x0, w, inner) {
+  return flip ? `<g transform="translate(${esc(2 * x0 + w)} 0) scale(-1 1)">${inner}</g>` : inner;
+}
+function tileShape(shape, w, h, radius) {
+  return shape === "circle"
+    ? `<circle cx="${w / 2}" cy="${h / 2}" r="${w / 2}"/>`
+    : `<rect width="${w}" height="${h}" rx="${w * radius}"/>`;
+}
+function tileFocus(spec, { x0, y0, w, h }) {
+  return spec.focus || { cx: x0 + w / 2, cy: y0 + h / 2, scale: 0.9 };
 }
 
 // ---- avatar -----------------------------------------------------------------
@@ -102,25 +154,15 @@ function outlineLayer(parts, pal, focus, colorHex, amount = 0.045) {
 //     center (wraps the tilt group in scale(-1,1)). Both default to no-ops.
 export function renderAvatar(spec, opts = {}) {
   const { expression, accessory, field = "field", size = 240, outline = null, showField = true, headTurn = 0, flip = false } = opts;
-  const pal = { ...spec.palette, field: spec.palette[field] || spec.palette.field };
-  const [x0, y0, w, h] = spec.viewBox;
-  const vb = spec.viewBox.join(" ");
+  const pal = paletteFor(spec, field);
+  const box = viewBoxOf(spec);
   const parts = applyExpression(spec.parts, spec.expressions?.[expression]);
-  const fieldPart = parts.find(p => p.id === "field");
-  const rest = parts.filter(p => p.id !== "field");
-  const acc = (spec.accessories?.[accessory] || []).map(p => renderPart(p, pal)).join("");
-  const back = showField && fieldPart ? renderPart(fieldPart, pal) : "";
-  const ol = outline ? outlineLayer(rest, pal, spec.focus, outline) : "";
-  const dx = Math.round(Math.max(-1, Math.min(1, +headTurn || 0)) * 18 * 100) / 100;
-  const body = rest.map(p => {
-    const el = renderPart(p, pal);
-    return dx && !p.silhouette ? `<g transform="translate(${esc(dx)} 0)">${el}</g>` : el;
-  }).join("");
-  const tilt = spec.tilt
-    ? `<g transform="rotate(${spec.tilt} ${spec.focus?.cx ?? x0 + w / 2} ${spec.focus?.cy ?? y0 + h / 2})">${ol}${body}${acc}</g>`
-    : `${ol}${body}${acc}`;
-  const char = flip ? `<g transform="translate(${esc(2 * x0 + w)} 0) scale(-1 1)">${tilt}</g>` : tilt;
-  return `<svg width="${size}" height="${size}" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${back}${char}</svg>`;
+  const { fieldPart, rest } = splitField(parts);
+  const acc = accessoryParts(spec, accessory, pal);
+  const ol = maybeOutline(rest, spec.focus, outline);
+  const body = paintParts(rest, pal, headTurnX(headTurn));
+  const char = maybeFlip(flip, box.x0, box.w, withTilt(spec, box, `${ol}${body}${acc}`));
+  return svgAt(size, box.vb, `${paintField(fieldPart, pal, showField)}${char}`);
 }
 
 // ---- favicon / app tile: SAME geometry, framed on the head, clipped ---------
@@ -128,64 +170,78 @@ export function renderAvatar(spec, opts = {}) {
 export function renderTile(spec, opts = {}) {
   const { size = 64, shape = "round", radius = 0.23, field = "field", bg } = opts;
   const id = "m" + (_cid++);
-  const [x0, y0, w, h] = spec.viewBox;
-  const f = spec.focus || { cx: x0 + w / 2, cy: y0 + h / 2, scale: 0.9 };
+  const box = viewBoxOf(spec), { w, h } = box;
+  const f = tileFocus(spec, box);
   const s = f.scale ?? 0.9, cx = w / 2, cy = h * 0.52;
-  const fill = esc(bg || spec.palette[field] || spec.palette.field);
-  const shp = shape === "circle"
-    ? `<circle cx="${w / 2}" cy="${h / 2}" r="${w / 2}"/>`
-    : `<rect width="${w}" height="${h}" rx="${w * radius}"/>`;
+  const fill = esc(bg || paletteFor(spec, field).field);
   const inner = renderAvatar(spec, { size, showField: false }).replace(/^<svg[^>]*>|<\/svg>$/g, "");
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">` +
-    `<defs><clipPath id="${id}">${shp}</clipPath></defs>` +
+  return svgAt(size, `0 0 ${w} ${h}`,
+    `<defs><clipPath id="${id}">${tileShape(shape, w, h, radius)}</clipPath></defs>` +
     `<g clip-path="url(#${id})"><rect width="${w}" height="${h}" fill="${fill}"/>` +
-    `<g transform="translate(${cx - s * f.cx} ${cy - s * f.cy}) scale(${s})">${inner}</g></g></svg>`;
+    `<g transform="translate(${cx - s * f.cx} ${cy - s * f.cy}) scale(${s})">${inner}</g></g>`);
 }
 
 // ---- expression sheet -------------------------------------------------------
 export function expressionNames(spec) { return Object.keys(spec.expressions || { happy: {} }); }
+
+function idleUnit(property) {
+  if (property === "rotate") return "deg";
+  if (property === "translateY") return "%";
+  return "";
+}
+function idleTransform(property, v, unit) {
+  if (property === "translateY") return `translateY(${esc(v)}${unit})`;
+  if (property === "rotate") return `rotate(${esc(v)}${unit})`;
+  return `scaleY(${esc(v)})`;
+}
+function idleIter(idle) {
+  return idle?.loop === false ? "1" : "infinite";
+}
+function compileOneTrack(t, i, iid, cls) {
+  if (!t.keys?.length) return "";
+  const name = iid + "k" + i, unit = idleUnit(t.property);
+  const dur = t.keys[t.keys.length - 1][0];
+  if (!(dur > 0)) return "";
+  const frames = t.keys.map(([time, v]) => {
+    const pct = (time / dur * 100).toFixed(1);
+    return `${pct}%{transform:${idleTransform(t.property, v, unit)}}`;
+  }).join("");
+  const targets = Array.isArray(t.target) ? t.target : [t.target];
+  targets.forEach(id => { (cls[id] = cls[id] || []).push({ name, dur }); });
+  return `@keyframes ${name}{${frames}}`;
+}
+function compileIdleTracks(tracks, iid, cls) {
+  let css = "";
+  (tracks || []).forEach((t, i) => { css += compileOneTrack(t, i, iid, cls); });
+  return css;
+}
+function originOf(p) {
+  const ox = isSet(p.cx) ? `${esc(p.cx)}px` : "50%", oy = isSet(p.cy) ? `${esc(p.cy)}px` : "50%";
+  return `${ox} ${oy}`;
+}
+function wrapIdlePart(p, el, anims, iter) {
+  if (!anims) return el;
+  const anim = anims.map(x => `${esc(x.name)} ${esc(x.dur)}s ease-in-out ${iter}`).join(",");
+  return `<g class="cr-${esc(p.id)}" style="animation:${anim};transform-box:view-box;transform-origin:${originOf(p)}">${el}</g>`;
+}
 
 // ---- idle animation: emit a <style> + wrapped groups from the spec's tracks --
 // Supported properties: translateY, rotate, scaleY. Portable, zero-dependency —
 // no Lottie runtime. Returns an SVG string that animates in any browser.
 export function renderIdle(spec, opts = {}) {
   const { size = 160, field = "field" } = opts;
-  const pal = { ...spec.palette, field: spec.palette[field] || spec.palette.field };
-  const [x0, y0, w, h] = spec.viewBox;
+  const pal = paletteFor(spec, field);
+  const box = viewBoxOf(spec);
   const idle = spec.animations?.idle;
-  const parts = spec.parts.filter(p => p.id !== "field");
-  const fieldPart = spec.parts.find(p => p.id === "field");
+  const { fieldPart, rest } = splitField(spec.parts);
   const iid = "m" + (_cid++); // unique per call, so keyframe names never collide across mascots on one page
-  const iter = idle?.loop === false ? "1" : "infinite";
+  const iter = idleIter(idle);
   const cls = {}; // partId -> [animName...]
-  let css = "@media(prefers-reduced-motion:reduce){[class^=cr-]{animation:none!important}}";
-  (idle?.tracks || []).forEach((t, i) => {
-    if (!t.keys?.length) return;
-    const name = iid + "k" + i, unit = t.property === "rotate" ? "deg" : t.property === "translateY" ? "%" : "";
-    const dur = t.keys[t.keys.length - 1][0];
-    if (!(dur > 0)) return;
-    const frames = t.keys.map(([time, v]) => {
-      const pct = (time / dur * 100).toFixed(1);
-      const fn = t.property === "translateY" ? `translateY(${esc(v)}${unit})`
-        : t.property === "rotate" ? `rotate(${esc(v)}${unit})` : `scaleY(${esc(v)})`;
-      return `${pct}%{transform:${fn}}`;
-    }).join("");
-    css += `@keyframes ${name}{${frames}}`;
-    const targets = Array.isArray(t.target) ? t.target : [t.target];
-    targets.forEach(id => { (cls[id] = cls[id] || []).push({ name, dur }); });
-  });
-  const render = p => {
-    const a = cls[p.id];
-    const el = renderPart(p, pal);
-    if (!a) return el;
-    const anim = a.map(x => `${esc(x.name)} ${esc(x.dur)}s ease-in-out ${iter}`).join(",");
-    const ox = p.cx != null ? `${esc(p.cx)}px` : "50%", oy = p.cy != null ? `${esc(p.cy)}px` : "50%";
-    return `<g class="cr-${esc(p.id)}" style="animation:${anim};transform-box:view-box;transform-origin:${ox} ${oy}">${el}</g>`;
-  };
-  const body = parts.map(render).join("");
-  const tilt = spec.tilt ? `<g transform="rotate(${spec.tilt} ${spec.focus?.cx ?? x0 + w / 2} ${spec.focus?.cy ?? y0 + h / 2})">${body}</g>` : body;
-  return `<svg width="${size}" height="${size}" viewBox="${x0} ${y0} ${w} ${h}" xmlns="http://www.w3.org/2000/svg"><style>${css}</style>` +
-    (fieldPart ? renderPart(fieldPart, pal) : "") + tilt + `</svg>`;
+  const css = "@media(prefers-reduced-motion:reduce){[class^=cr-]{animation:none!important}}" +
+    compileIdleTracks(idle?.tracks, iid, cls);
+  const body = rest.map(p => wrapIdlePart(p, renderPart(p, pal), cls[p.id], iter)).join("");
+  return svgAt(size, `${box.x0} ${box.y0} ${box.w} ${box.h}`,
+    `<style>${css}</style>` + paintField(fieldPart, pal) + withTilt(spec, box, body));
 }
 
 // Convenience for Node consumers: everything in one namespace.

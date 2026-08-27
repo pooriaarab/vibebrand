@@ -25,7 +25,7 @@ function place(gh, x, y) {
   const s = gh / VH;
   return `<g transform="translate(${x} ${y}) scale(${s})">${glyph(gh)}</g>`;
 }
-function textBlock(x, y, big, small, colBig, colSmall) {
+function textBlock({ x, y, big, small, colBig, colSmall }) {
   const t = big ? `<text x="${x}" y="${y}" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-size="${big.size}" font-weight="800" fill="${colBig}" letter-spacing="-1">${big.t}</text>` : "";
   const s = small ? `<text x="${x}" y="${y + (big ? big.size * 0.8 : 0)}" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-size="${small.size}" font-weight="500" fill="${colSmall}">${small.t}</text>` : "";
   return t + s;
@@ -56,19 +56,19 @@ write("profile-square-512.svg", svg(512, 512, `<rect width="512" height="512" fi
 write("og-1200x630.svg", svg(1200, 630,
   `<rect width="1200" height="630" fill="${field}"/>` +
   place(430, 96, 100) +
-  textBlock(560, 300, { t: title, size: 84 }, tagline ? { t: tagline, size: 34 } : null, onWhite(), "rgba(255,255,255,.82)")));
+  textBlock({ x: 560, y: 300, big: { t: title, size: 84 }, small: tagline ? { t: tagline, size: 34 } : null, colBig: onWhite(), colSmall: "rgba(255,255,255,.82)" })));
 
 // --- LinkedIn cover 1584×396 ---
 write("linkedin-cover-1584x396.svg", svg(1584, 396,
   `<rect width="1584" height="396" fill="${field}"/>` +
   place(320, 120, 40) +
-  textBlock(500, 190, { t: title, size: 66 }, tagline ? { t: tagline, size: 30 } : null, onWhite(), "rgba(255,255,255,.82)")));
+  textBlock({ x: 500, y: 190, big: { t: title, size: 66 }, small: tagline ? { t: tagline, size: 30 } : null, colBig: onWhite(), colSmall: "rgba(255,255,255,.82)" })));
 
 // --- X / Twitter header 1500×500 ---
 write("x-header-1500x500.svg", svg(1500, 500,
   `<rect width="1500" height="500" fill="${field}"/>` +
   place(360, 150, 70) +
-  textBlock(560, 250, { t: title, size: 72 }, tagline ? { t: tagline, size: 32 } : null, onWhite(), "rgba(255,255,255,.82)")));
+  textBlock({ x: 560, y: 250, big: { t: title, size: 72 }, small: tagline ? { t: tagline, size: 32 } : null, colBig: onWhite(), colSmall: "rgba(255,255,255,.82)" })));
 
 // --- pack README ---
 write("README.md",
