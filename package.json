@@ -29,13 +29,18 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./mascot/engine.js": "./mascot/engine.js",
+    "./mascot/*.avatar.json": "./mascot/*.avatar.json",
+    "./package.json": "./package.json"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "files": [
     "dist",
+    "mascot/engine.js",
+    "mascot/*.avatar.json",
     "README.md"
   ],
   "scripts": {
