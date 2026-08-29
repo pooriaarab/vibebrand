@@ -319,8 +319,18 @@ function hslToRgbStr({ h, s, l }) {
   const b = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
   return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
 }
+// #rgb, #rgba, #rrggbb, #rrggbbaa — the forms hexToRgb can actually read.
+const HEX_RE = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+
 function rotateHex(hex, degrees) {
+  // Non-hex palette values (`none`, a keyword, a url()) pass through untouched.
   if (!hex || hex === "none" || !hex.startsWith("#")) return hex;
+  // A malformed hex must NOT slip through. parseInt returns NaN, and
+  // (NaN >> 16) & 255 is 0, so `#ggg` would render solid black with no warning —
+  // the same silent-wrong-result assertRosterOpts exists to prevent.
+  if (!HEX_RE.test(hex)) {
+    throw new TypeError(`variantSpec: malformed hex colour in palette: ${hex}`);
+  }
   const { r, g, b } = hexToRgb(hex);
   const hsl = rgbToHsl(r, g, b);
   hsl.h = ((hsl.h + degrees) % 360 + 360) % 360;
