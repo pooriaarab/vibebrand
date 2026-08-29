@@ -240,3 +240,21 @@ describe("variantSpec – hex forms and numeric config", () => {
     assert.doesNotThrow(() => variantSpec(spec, "a", { jitter: 0.999 }));
   });
 });
+
+describe("variantSpec – malformed palette values", () => {
+  // parseInt("ggg", 16) is NaN and (NaN >> 16) & 255 is 0, so this would have
+  // rendered solid black with no warning.
+  it("throws on a malformed hex colour", () => {
+    for (const bad of ["#ggg", "#12345", "#xyzxyz"]) {
+      const broken = JSON.parse(JSON.stringify(spec));
+      broken.palette.body = bad;
+      assert.throws(() => variantSpec(broken, "a", { hues: [90] }), TypeError, bad);
+    }
+  });
+
+  it("passes non-hex palette values through untouched", () => {
+    const keyworded = JSON.parse(JSON.stringify(spec));
+    keyworded.palette.body = "none";
+    assert.equal(variantSpec(keyworded, "a", { hues: [90] }).palette.body, "none");
+  });
+});
