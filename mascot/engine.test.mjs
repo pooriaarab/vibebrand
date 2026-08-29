@@ -158,11 +158,20 @@ describe("renderRoster", () => {
 
 describe("variantSpec – opts passthrough", () => {
   it("accepts custom hues", () => {
-    const hues = [0, 90, 180, 270];
+    // Deliberately excludes 0. With 0 in the set some seed will legitimately
+    // pick "no rotation" and keep the source colour, so asserting that every
+    // seed differs would be asserting something untrue — it only held before
+    // by luck of which offsets the hash happened to select.
+    const hues = [90, 180, 270];
     for (const seed of ["a", "b", "c", "d", "e"]) {
       const v = variantSpec(spec, seed, { hues });
-      assert.notStrictEqual(v.palette.body, spec.palette.body);
+      assert.notStrictEqual(v.palette.body, spec.palette.body, seed);
     }
+  });
+
+  it("treats a 0 offset as no rotation", () => {
+    const v = variantSpec(spec, "any", { hues: [0] });
+    assert.strictEqual(v.palette.body, spec.palette.body);
   });
 
   it("accepts custom jitter", () => {
@@ -256,5 +265,17 @@ describe("variantSpec – malformed palette values", () => {
     const keyworded = JSON.parse(JSON.stringify(spec));
     keyworded.palette.body = "none";
     assert.equal(variantSpec(keyworded, "a", { hues: [90] }).palette.body, "none");
+  });
+});
+
+describe("seededTrait – unambiguous encoding", () => {
+  // A plain "|" join made these two hash the same string, so a seed containing
+  // the separator could collide with an unrelated entity.
+  it("does not collide when the separator appears in the seed", () => {
+    assert.notEqual(seededTrait("a|b", "c"), seededTrait("a", "b|c"));
+  });
+
+  it("still collides for genuinely identical inputs", () => {
+    assert.equal(seededTrait("team|lead", "hue"), seededTrait("team|lead", "hue"));
   });
 });
