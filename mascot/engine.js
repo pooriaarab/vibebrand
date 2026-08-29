@@ -244,5 +244,119 @@ export function renderIdle(spec, opts = {}) {
     `<style>${css}</style>` + paintField(fieldPart, pal) + withTilt(spec, box, body));
 }
 
+// ---- seeded roster (deterministic variants from one spec) ------------------
+
+// FNV-1a 32-bit — fast, portable, deterministic across runtimes.
+function fnv1a(str) {
+  let h = 0x811c9dc5 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h >>> 0;
+}
+
+// Deterministic float in [0, 1) from a seed + key pair. Same inputs always
+// give the same output on any runtime.
+export function seededTrait(seed, key) {
+  return fnv1a(String(seed) + "|" + String(key)) / 0x100000000;
+}
+
+// colour helpers for variantSpec — hex ↔ HSL ↔ rotate
+function hexToRgb(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
+}
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  let h = 0, s = 0, l = (mx + mn) / 2;
+  if (mx !== mn) {
+    const d = mx - mn;
+    s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    if (mx === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (mx === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+function hslToRgbStr({ h, s, l }) {
+  h /= 360; s /= 100; l /= 100;
+  if (s === 0) {
+    const g = Math.round(l * 255);
+    return "#" + [g, g, g].map(v => v.toString(16).padStart(2, "0")).join("");
+  }
+  const hue2rgb = (p, q, t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const r = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
+  const g = Math.round(hue2rgb(p, q, h) * 255);
+  const b = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
+  return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+}
+function rotateHex(hex, degrees) {
+  if (!hex || hex === "none" || !hex.startsWith("#")) return hex;
+  const { r, g, b } = hexToRgb(hex);
+  const hsl = rgbToHsl(r, g, b);
+  hsl.h = ((hsl.h + degrees) % 360 + 360) % 360;
+  return hslToRgbStr(hsl);
+}
+
+// Build a new spec (never mutates the input) with deterministic variations
+// keyed on `seed`. Colour hues rotate from a fixed, enumerable set. Silhouette
+// geometry jitters independently per part property. Face parts pass through
+// untouched — that keeps the roster one character.
+export function variantSpec(spec, seed, opts = {}) {
+  const { jitter = 0.06, hues = [0, 36, 72, 108, 144, 180, 216, 252, 288, 324] } = opts;
+  // pick ONE hue offset from the enum for this seed
+  const hueOff = hues[Math.floor(seededTrait(seed, "hue") * hues.length)];
+
+  // deep-clone parts (face = without silhouette:true)
+  const parts = spec.parts.map(p => ({ ...p }));
+
+  // rotate palette — never touch ink
+  const palette = {};
+  for (const [k, v] of Object.entries(spec.palette)) {
+    palette[k] = k === "ink" ? v : rotateHex(v, hueOff);
+  }
+
+  // jitter silhouette geometry independently per part per property
+  for (const p of parts) {
+    if (!p.silhouette) continue;
+    for (const prop of ["rx", "ry", "cx", "cy"]) {
+      if (p[prop] === undefined) continue;
+      const t = seededTrait(seed, p.id + "|" + prop);
+      const offset = (t * 2 - 1) * jitter;
+      p[prop] = p[prop] * (1 + offset);
+    }
+  }
+
+  // Spread rather than enumerate. Listing fields by hand means any spec key
+  // added later — a new animation block, metadata, anything — is silently
+  // dropped from every variant, which would surface as a missing feature on
+  // rosters only, long after the field was added.
+  return {
+    ...spec,
+    focus: spec.focus ? { ...spec.focus } : undefined,
+    palette,
+    parts,
+  };
+}
+
+// Render a roster of variants — one per seed.
+export function renderRoster(spec, seeds, opts = {}) {
+  return seeds.map(seed => ({
+    seed,
+    svg: renderAvatar(variantSpec(spec, seed, opts), opts)
+  }));
+}
+
 // Convenience for Node consumers: everything in one namespace.
-export default { renderPart, renderAvatar, renderTile, renderIdle, expressionNames };
+export default { renderPart, renderAvatar, renderTile, renderIdle, expressionNames, seededTrait, variantSpec, renderRoster };

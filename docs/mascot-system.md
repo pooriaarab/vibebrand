@@ -149,3 +149,39 @@ renderIdle(spec, { size: 160 });                         // ambient animation
 `mascot/rabbit.avatar.json` is the reference spec. To brand a new project, copy
 it, swap the `palette`, and reshape the silhouette parts for the animal — the
 rest of the system comes along for free.
+
+## Roster: why the face is held constant
+
+When you give every agent, team member, or workspace their own variant of the same
+character, keeping the **face unchanged** is the rule that makes the roster look
+like one family instead of N unrelated species.
+
+The face — eyes, nose, mouth — is the part a viewer reads to recognise the
+character. Move the eyes and the rabbit stops being *the* rabbit; it becomes a
+different rabbit. So the engine pins every part that does not have
+`silhouette: true` to the original geometry. Across every variant, Alice's rabbit
+and Bob's rabbit share the same eyes, the same nose, the same mouth — and the
+same expression system works identically on both.
+
+What *does* vary:
+
+- **Colour.** A hue offset from a **fixed, enumerable set** is applied to every
+  palette entry except `ink`. The set is defined (default: ten rotations from 0°
+  to 324° in 36° steps), so a brand's palette never accumulates unbounded new
+  colours. A 500-workspace roster still fits the same swatch book.
+- **Silhouette geometry.** Parts marked `silhouette: true` (ears, head, body) get
+  a per-property, per-part jitter on `cx`, `cy`, `rx`, `ry`. The jitter is seeded
+  on each part's `id` plus the property name, so every entity's silhouette is
+  stable and unique, but the overall shape-family is unchanged.
+
+The result reads as one character seen through a slightly different lens each time
+— recognisably the same rabbit, but never a carbon copy.
+
+```js
+import { renderRoster, renderAvatar } from "vibebrand/mascot/engine.js";
+import spec from "./rabbit.avatar.json" assert { type: "json" };
+
+renderRoster(spec, ["alice", "bob", "carol"])
+// → three SVGs, each with a different body colour and silhouette,
+//   all sharing the same face and expression system
+```

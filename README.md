@@ -71,8 +71,34 @@ free: `mascot/rabbit.avatar.json` (Content Rabbit), `bat.avatar.json` (BlogBat),
 and `sheep.avatar.json` (Supportsheep) are the same 200-line engine, three
 characters. Open `mascot/brand-lab.html` to explore any of them live.
 
+### Roster: one spec, N distinct variants
+
+Any product with many named entities — agents, team members, workspaces, tenants —
+needs each entity to look distinct but obviously the same character. The roster
+system derives N deterministic variants from one spec without hand-authoring N
+avatar files.
+
+Call `renderRoster(spec, seeds)` with your entity names:
+
+```js
+import { renderRoster } from "vibebrand/mascot/engine.js";
+import spec from "./rabbit.avatar.json" assert { type: "json" };
+
+const { svg } = renderRoster(spec, ["alice", "bob", "carol"]);
+// → [{ seed: "alice", svg: "<svg>…</svg>" }, …]
+```
+
+Each variant gets a stable hue rotation (from a fixed enumerable set — the brand
+palette never grows arbitrarily) and independent silhouette jitter. The face is
+held constant: every entity shares the same eyes, nose, and mouth. A
+500-person roster still uses **N colours**, not 500.
+
+The per-seed variation is also usable directly: `variantSpec(spec, "alice")`
+returns a new spec you can inspect, test, or render with any engine function.
+
 Full method — shape language, the three-quarter turn, light/dark, why you draw
-it once — is in [`docs/mascot-system.md`](docs/mascot-system.md).
+it once, and why the face is held constant — is in
+[`docs/mascot-system.md`](docs/mascot-system.md)."}]
 
 ## The directions
 

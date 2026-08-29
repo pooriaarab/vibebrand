@@ -39,6 +39,7 @@
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "tsup && node dist/cli.js check --all",
+    "test:unit": "node --test mascot/engine.test.mjs",
     "prepublishOnly": "npm run build"
   },
   "publishConfig": {
