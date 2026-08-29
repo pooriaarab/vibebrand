@@ -259,7 +259,11 @@ function fnv1a(str) {
 // Deterministic float in [0, 1) from a seed + key pair. Same inputs always
 // give the same output on any runtime.
 export function seededTrait(seed, key) {
-  return fnv1a(String(seed) + "|" + String(key)) / 0x100000000;
+  // JSON-encode the pair rather than joining on a separator. A plain "|" join
+  // is ambiguous: ("a|b", "c") and ("a", "b|c") both hash "a|b|c" and return the
+  // same trait, so a seed containing the separator could silently collide with
+  // another entity — the exact opposite of what a roster is for.
+  return fnv1a(JSON.stringify([String(seed), String(key)])) / 0x100000000;
 }
 
 // colour helpers for variantSpec — hex ↔ HSL ↔ rotate
