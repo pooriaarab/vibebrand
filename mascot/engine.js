@@ -270,7 +270,8 @@ function hexToRgb(hex) {
 function rgbToHsl(r, g, b) {
   r /= 255; g /= 255; b /= 255;
   const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-  let h = 0, s = 0, l = (mx + mn) / 2;
+  const l = (mx + mn) / 2;
+  let h = 0, s = 0;
   if (mx !== mn) {
     const d = mx - mn;
     s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
@@ -280,20 +281,23 @@ function rgbToHsl(r, g, b) {
   }
   return { h: h * 360, s: s * 100, l: l * 100 };
 }
+// Hoisted rather than nested: it captures nothing, so defining it inside
+// hslToRgbStr would rebuild the closure on every colour conversion.
+function hue2rgb(p, q, t) {
+  if (t < 0) t += 1;
+  if (t > 1) t -= 1;
+  if (t < 1 / 6) return p + (q - p) * 6 * t;
+  if (t < 1 / 2) return q;
+  if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+  return p;
+}
+
 function hslToRgbStr({ h, s, l }) {
   h /= 360; s /= 100; l /= 100;
   if (s === 0) {
     const g = Math.round(l * 255);
     return "#" + [g, g, g].map(v => v.toString(16).padStart(2, "0")).join("");
   }
-  const hue2rgb = (p, q, t) => {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-    return p;
-  };
   const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
   const p = 2 * l - q;
   const r = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
@@ -313,30 +317,38 @@ function rotateHex(hex, degrees) {
 // keyed on `seed`. Colour hues rotate from a fixed, enumerable set. Silhouette
 // geometry jitters independently per part property. Face parts pass through
 // untouched — that keeps the roster one character.
-export function variantSpec(spec, seed, opts = {}) {
-  const { jitter = 0.06, hues = [0, 36, 72, 108, 144, 180, 216, 252, 288, 324] } = opts;
-  // pick ONE hue offset from the enum for this seed
-  const hueOff = hues[Math.floor(seededTrait(seed, "hue") * hues.length)];
-
-  // deep-clone parts (face = without silhouette:true)
-  const parts = spec.parts.map(p => ({ ...p }));
-
-  // rotate palette — never touch ink
-  const palette = {};
-  for (const [k, v] of Object.entries(spec.palette)) {
-    palette[k] = k === "ink" ? v : rotateHex(v, hueOff);
+// Rotate every palette entry except ink, which keeps the linework constant.
+function rotatePalette(palette, hueOff) {
+  const out = {};
+  for (const [k, v] of Object.entries(palette)) {
+    out[k] = k === "ink" ? v : rotateHex(v, hueOff);
   }
+  return out;
+}
 
-  // jitter silhouette geometry independently per part per property
-  for (const p of parts) {
-    if (!p.silhouette) continue;
-    for (const prop of ["rx", "ry", "cx", "cy"]) {
+// Jitter silhouette geometry only, independently per part and per property.
+// Face parts (no silhouette flag) are returned untouched — that is what keeps
+// a roster one character rather than a set of unrelated creatures.
+const JITTERED = ["rx", "ry", "cx", "cy"];
+function jitterSilhouettes(parts, seed, jitter) {
+  return parts.map(part => {
+    const p = { ...part };
+    if (!p.silhouette) return p;
+    for (const prop of JITTERED) {
       if (p[prop] === undefined) continue;
-      const t = seededTrait(seed, p.id + "|" + prop);
-      const offset = (t * 2 - 1) * jitter;
+      const offset = (seededTrait(seed, p.id + "|" + prop) * 2 - 1) * jitter;
       p[prop] = p[prop] * (1 + offset);
     }
-  }
+    return p;
+  });
+}
+
+export function variantSpec(spec, seed, opts = {}) {
+  const { jitter = 0.06, hues = [0, 36, 72, 108, 144, 180, 216, 252, 288, 324] } = opts;
+  // ONE hue offset per seed, drawn from the fixed enum.
+  const hueOff = hues[Math.floor(seededTrait(seed, "hue") * hues.length)];
+  const palette = rotatePalette(spec.palette, hueOff);
+  const parts = jitterSilhouettes(spec.parts, seed, jitter);
 
   // Spread rather than enumerate. Listing fields by hand means any spec key
   // added later — a new animation block, metadata, anything — is silently
