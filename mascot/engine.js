@@ -357,19 +357,28 @@ function jitterSilhouettes(parts, seed, jitter) {
   });
 }
 
+// Config mistakes raise here rather than rendering something subtly wrong:
+// an empty or NaN-bearing hue set silently produced greyscale, and a
+// non-finite jitter put NaN straight into cx/cy/rx/ry.
+//
+// jitter is a PROPORTION of each part's own value, so [0, 1) is its meaningful
+// range, not merely a safe one: at 1 a part can collapse to zero size, and a
+// large-but-finite value overflows p[prop] * (1 + offset) to Infinity.
+function assertRosterOpts(hues, jitter) {
+  if (!Array.isArray(hues) || hues.length === 0 || !hues.every(Number.isFinite)) {
+    throw new TypeError("variantSpec: `hues` must be a non-empty array of finite degree offsets");
+  }
+  if (!Number.isFinite(jitter) || jitter < 0 || jitter >= 1) {
+    throw new RangeError("variantSpec: `jitter` must be a finite number in [0, 1)");
+  }
+}
+
 export function variantSpec(spec, seed, opts = {}) {
   const { jitter = 0.06, hues = [0, 36, 72, 108, 144, 180, 216, 252, 288, 324] } = opts;
   // Fail loudly on an empty set. Left alone, hueOff is undefined, rotateHex
   // rotates by NaN, and every variant comes out greyscale — a silent, puzzling
   // wrong result from what is plainly a config mistake.
-  if (!Array.isArray(hues) || hues.length === 0 || !hues.every(Number.isFinite)) {
-    throw new TypeError("variantSpec: `hues` must be a non-empty array of finite degree offsets");
-  }
-  // Same reason: a non-finite jitter propagates NaN into cx/cy/rx/ry and lands
-  // malformed geometry in the SVG instead of raising.
-  if (!Number.isFinite(jitter)) {
-    throw new TypeError("variantSpec: `jitter` must be a finite number");
-  }
+  assertRosterOpts(hues, jitter);
   // ONE hue offset per seed, drawn from the fixed enum.
   const hueOff = hues[Math.floor(seededTrait(seed, "hue") * hues.length)];
   const palette = rotatePalette(spec.palette, hueOff);
