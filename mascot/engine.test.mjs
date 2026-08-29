@@ -213,3 +213,23 @@ describe("variantSpec – config validation", () => {
     assert.throws(() => variantSpec(spec, "a", { hues: 180 }), TypeError);
   });
 });
+
+describe("variantSpec – hex forms and numeric config", () => {
+  it("handles 4- and 8-digit alpha hex without folding alpha into RGB", () => {
+    for (const value of ["#ffff", "#ffffffff"]) {
+      const withAlpha = JSON.parse(JSON.stringify(spec));
+      withAlpha.palette.body = value;
+      const out = variantSpec(withAlpha, "a", { hues: [180] });
+      assert.equal(out.palette.body.toLowerCase(), "#ffffff", value);
+    }
+  });
+
+  it("rejects non-finite hue offsets", () => {
+    assert.throws(() => variantSpec(spec, "a", { hues: [NaN] }), TypeError);
+    assert.throws(() => variantSpec(spec, "a", { hues: [0, Infinity] }), TypeError);
+  });
+
+  it("rejects a non-finite jitter", () => {
+    assert.throws(() => variantSpec(spec, "a", { jitter: NaN }), TypeError);
+  });
+});
