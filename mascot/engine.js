@@ -264,7 +264,12 @@ export function seededTrait(seed, key) {
 
 // colour helpers for variantSpec — hex ↔ HSL ↔ rotate
 function hexToRgb(hex) {
-  const v = parseInt(hex.slice(1), 16);
+  // Expand #abc to #aabbcc first. Without this, parseInt("fff", 16) reads as
+  // 0x000fff, so #fff would rotate as rgb(0, 15, 255) instead of white — wrong
+  // colours from a perfectly valid palette, even at hue offset 0.
+  let h = hex.slice(1);
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  const v = parseInt(h, 16);
   return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
 }
 function rgbToHsl(r, g, b) {
@@ -345,6 +350,12 @@ function jitterSilhouettes(parts, seed, jitter) {
 
 export function variantSpec(spec, seed, opts = {}) {
   const { jitter = 0.06, hues = [0, 36, 72, 108, 144, 180, 216, 252, 288, 324] } = opts;
+  // Fail loudly on an empty set. Left alone, hueOff is undefined, rotateHex
+  // rotates by NaN, and every variant comes out greyscale — a silent, puzzling
+  // wrong result from what is plainly a config mistake.
+  if (!Array.isArray(hues) || hues.length === 0) {
+    throw new TypeError("variantSpec: `hues` must be a non-empty array of degree offsets");
+  }
   // ONE hue offset per seed, drawn from the fixed enum.
   const hueOff = hues[Math.floor(seededTrait(seed, "hue") * hues.length)];
   const palette = rotatePalette(spec.palette, hueOff);

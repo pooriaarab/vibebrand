@@ -189,3 +189,27 @@ describe("variantSpec – forward compatibility", () => {
     assert.deepStrictEqual(out.futureField, { anything: 1 });
   });
 });
+
+describe("variantSpec – colour parsing", () => {
+  // #fff must not be read as 0x000fff. A 3-digit palette entry would otherwise
+  // come out a wrong colour even at hue offset 0, from a valid spec.
+  it("expands 3-digit hex before rotating", () => {
+    const white = JSON.parse(JSON.stringify(spec));
+    white.palette.body = "#fff";
+    // Hue rotation of a zero-saturation colour must leave it white.
+    const out = variantSpec(white, "any-seed", { hues: [180] });
+    assert.equal(out.palette.body.toLowerCase(), "#ffffff");
+  });
+});
+
+describe("variantSpec – config validation", () => {
+  // An empty set left hueOff undefined, rotateHex rotated by NaN, and every
+  // variant silently came out greyscale. A throw names the mistake instead.
+  it("rejects an empty hue set", () => {
+    assert.throws(() => variantSpec(spec, "a", { hues: [] }), TypeError);
+  });
+
+  it("rejects a non-array hue set", () => {
+    assert.throws(() => variantSpec(spec, "a", { hues: 180 }), TypeError);
+  });
+});
