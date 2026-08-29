@@ -1,0 +1,25 @@
+# The unit suite had no way to run: `test:unit` was not wired into `test`, and no
+# workflow ran tests at all. A regression in the mascot engine would have shipped
+# green. Typecheck runs here too, for the same reason.
+name: test
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Unit tests
+        run: bun run test:unit
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Build
+        run: bun run build

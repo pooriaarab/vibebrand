@@ -1,7 +1,7 @@
 {
   "name": "vibebrand",
   "version": "0.1.0",
-  "description": "Generate a complete, tokenized brand/design system — pick a direction, get CSS design tokens (light + dark), fonts, and a starting point for logo/favicon/OG. SDK + CLI (MCP coming). Productizes the saas-brand-system workflow.",
+  "description": "Generate a complete, tokenized brand/design system \u2014 pick a direction, get CSS design tokens (light + dark), fonts, and a starting point for logo/favicon/OG. SDK + CLI (MCP coming). Productizes the saas-brand-system workflow.",
   "keywords": [
     "branding",
     "design-system",
@@ -34,11 +34,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "tsup && node dist/cli.js check --all",
+    "test": "node --test mascot/engine.test.mjs && tsup && node dist/cli.js check --all",
     "test:unit": "node --test mascot/engine.test.mjs",
     "prepublishOnly": "npm run build"
   },
