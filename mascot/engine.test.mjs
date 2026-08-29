@@ -229,7 +229,14 @@ describe("variantSpec – hex forms and numeric config", () => {
     assert.throws(() => variantSpec(spec, "a", { hues: [0, Infinity] }), TypeError);
   });
 
-  it("rejects a non-finite jitter", () => {
-    assert.throws(() => variantSpec(spec, "a", { jitter: NaN }), TypeError);
+  it("rejects a jitter outside [0, 1)", () => {
+    for (const bad of [NaN, Infinity, -0.1, 1, Number.MAX_VALUE]) {
+      assert.throws(() => variantSpec(spec, "a", { jitter: bad }), RangeError, String(bad));
+    }
+  });
+
+  it("accepts the bounds of the jitter range", () => {
+    assert.doesNotThrow(() => variantSpec(spec, "a", { jitter: 0 }));
+    assert.doesNotThrow(() => variantSpec(spec, "a", { jitter: 0.999 }));
   });
 });
