@@ -5,7 +5,6 @@ import {
   seededTrait,
   variantSpec,
   renderRoster,
-  renderAvatar,
 } from "./engine.js";
 
 // Quiet helper: load the reference spec without import assertions
