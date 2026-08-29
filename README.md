@@ -84,7 +84,7 @@ Call `renderRoster(spec, seeds)` with your entity names:
 import { renderRoster } from "vibebrand/mascot/engine.js";
 import spec from "./rabbit.avatar.json" assert { type: "json" };
 
-const { svg } = renderRoster(spec, ["alice", "bob", "carol"]);
+const roster = renderRoster(spec, ["alice", "bob", "carol"]);
 // → [{ seed: "alice", svg: "<svg>…</svg>" }, …]
 ```
 
@@ -98,7 +98,7 @@ returns a new spec you can inspect, test, or render with any engine function.
 
 Full method — shape language, the three-quarter turn, light/dark, why you draw
 it once, and why the face is held constant — is in
-[`docs/mascot-system.md`](docs/mascot-system.md)."}]
+[`docs/mascot-system.md`](docs/mascot-system.md).
 
 ## The directions
 
