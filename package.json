@@ -29,16 +29,25 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./mascot/engine.js": "./mascot/engine.js",
+    "./mascot/*.avatar.json": "./mascot/*.avatar.json",
+    "./package.json": "./package.json"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "mascot/engine.js",
+    "mascot/*.avatar.json",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "tsup && node dist/cli.js check --all",
+    "test": "node --test mascot/engine.test.mjs && tsup && node dist/cli.js check --all",
+    "test:unit": "node --test mascot/engine.test.mjs",
     "prepublishOnly": "npm run build"
   },
   "publishConfig": {

@@ -244,5 +244,179 @@ export function renderIdle(spec, opts = {}) {
     `<style>${css}</style>` + paintField(fieldPart, pal) + withTilt(spec, box, body));
 }
 
+// ---- seeded roster (deterministic variants from one spec) ------------------
+
+// FNV-1a 32-bit — fast, portable, deterministic across runtimes.
+function fnv1a(str) {
+  let h = 0x811c9dc5 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h >>> 0;
+}
+
+// Deterministic float in [0, 1) from a seed + key pair. Same inputs always
+// give the same output on any runtime.
+export function seededTrait(seed, key) {
+  // JSON-encode the pair rather than joining on a separator. A plain "|" join
+  // is ambiguous: ("a|b", "c") and ("a", "b|c") both hash "a|b|c" and return the
+  // same trait, so a seed containing the separator could silently collide with
+  // another entity — the exact opposite of what a roster is for.
+  return fnv1a(JSON.stringify([String(seed), String(key)])) / 0x100000000;
+}
+
+// colour helpers for variantSpec — hex ↔ HSL ↔ rotate
+// Accepts #rgb, #rgba, #rrggbb and #rrggbbaa. Alpha is dropped, since the
+// output is opaque hex either way.
+//
+// The shorthand expansion is load-bearing: parseInt("fff", 16) reads as 0x000fff,
+// so #fff would rotate as rgb(0, 15, 255) instead of staying white. The 8-digit
+// case matters for the same reason plus one worse — folding alpha into the RGB
+// bits can flip the sign of `>> 16`. Both are silently wrong colours from a
+// perfectly valid palette.
+function hexToRgb(hex) {
+  let h = hex.slice(1);
+  if (h.length === 3 || h.length === 4) {
+    h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  } else {
+    h = h.slice(0, 6);
+  }
+  const v = parseInt(h, 16);
+  return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
+}
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  const l = (mx + mn) / 2;
+  let h = 0, s = 0;
+  if (mx !== mn) {
+    const d = mx - mn;
+    s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    if (mx === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (mx === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+// Hoisted rather than nested: it captures nothing, so defining it inside
+// hslToRgbStr would rebuild the closure on every colour conversion.
+function hue2rgb(p, q, t) {
+  if (t < 0) t += 1;
+  if (t > 1) t -= 1;
+  if (t < 1 / 6) return p + (q - p) * 6 * t;
+  if (t < 1 / 2) return q;
+  if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+  return p;
+}
+
+function hslToRgbStr({ h, s, l }) {
+  h /= 360; s /= 100; l /= 100;
+  if (s === 0) {
+    const g = Math.round(l * 255);
+    return "#" + [g, g, g].map(v => v.toString(16).padStart(2, "0")).join("");
+  }
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const r = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
+  const g = Math.round(hue2rgb(p, q, h) * 255);
+  const b = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
+  return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+}
+// #rgb, #rgba, #rrggbb, #rrggbbaa — the forms hexToRgb can actually read.
+const HEX_RE = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+
+function rotateHex(hex, degrees) {
+  // Non-hex palette values (`none`, a keyword, a url()) pass through untouched.
+  if (!hex || hex === "none" || !hex.startsWith("#")) return hex;
+  // A malformed hex must NOT slip through. parseInt returns NaN, and
+  // (NaN >> 16) & 255 is 0, so `#ggg` would render solid black with no warning —
+  // the same silent-wrong-result assertRosterOpts exists to prevent.
+  if (!HEX_RE.test(hex)) {
+    throw new TypeError(`variantSpec: malformed hex colour in palette: ${hex}`);
+  }
+  const { r, g, b } = hexToRgb(hex);
+  const hsl = rgbToHsl(r, g, b);
+  hsl.h = ((hsl.h + degrees) % 360 + 360) % 360;
+  return hslToRgbStr(hsl);
+}
+
+// Build a new spec (never mutates the input) with deterministic variations
+// keyed on `seed`. Colour hues rotate from a fixed, enumerable set. Silhouette
+// geometry jitters independently per part property. Face parts pass through
+// untouched — that keeps the roster one character.
+// Rotate every palette entry except ink, which keeps the linework constant.
+function rotatePalette(palette, hueOff) {
+  const out = {};
+  for (const [k, v] of Object.entries(palette)) {
+    out[k] = k === "ink" ? v : rotateHex(v, hueOff);
+  }
+  return out;
+}
+
+// Jitter silhouette geometry only, independently per part and per property.
+// Face parts (no silhouette flag) are returned untouched — that is what keeps
+// a roster one character rather than a set of unrelated creatures.
+const JITTERED = ["rx", "ry", "cx", "cy"];
+function jitterSilhouettes(parts, seed, jitter) {
+  return parts.map(part => {
+    const p = { ...part };
+    if (!p.silhouette) return p;
+    for (const prop of JITTERED) {
+      if (p[prop] === undefined) continue;
+      const offset = (seededTrait(seed, p.id + "|" + prop) * 2 - 1) * jitter;
+      p[prop] = p[prop] * (1 + offset);
+    }
+    return p;
+  });
+}
+
+// Config mistakes raise here rather than rendering something subtly wrong:
+// an empty or NaN-bearing hue set silently produced greyscale, and a
+// non-finite jitter put NaN straight into cx/cy/rx/ry.
+//
+// jitter is a PROPORTION of each part's own value, so [0, 1) is its meaningful
+// range, not merely a safe one: at 1 a part can collapse to zero size, and a
+// large-but-finite value overflows p[prop] * (1 + offset) to Infinity.
+function assertRosterOpts(hues, jitter) {
+  if (!Array.isArray(hues) || hues.length === 0 || !hues.every(Number.isFinite)) {
+    throw new TypeError("variantSpec: `hues` must be a non-empty array of finite degree offsets");
+  }
+  if (!Number.isFinite(jitter) || jitter < 0 || jitter >= 1) {
+    throw new RangeError("variantSpec: `jitter` must be a finite number in [0, 1)");
+  }
+}
+
+export function variantSpec(spec, seed, opts = {}) {
+  const { jitter = 0.06, hues = [0, 36, 72, 108, 144, 180, 216, 252, 288, 324] } = opts;
+  // Fail loudly on an empty set. Left alone, hueOff is undefined, rotateHex
+  // rotates by NaN, and every variant comes out greyscale — a silent, puzzling
+  // wrong result from what is plainly a config mistake.
+  assertRosterOpts(hues, jitter);
+  // ONE hue offset per seed, drawn from the fixed enum.
+  const hueOff = hues[Math.floor(seededTrait(seed, "hue") * hues.length)];
+  const palette = rotatePalette(spec.palette, hueOff);
+  const parts = jitterSilhouettes(spec.parts, seed, jitter);
+
+  // Spread rather than enumerate. Listing fields by hand means any spec key
+  // added later — a new animation block, metadata, anything — is silently
+  // dropped from every variant, which would surface as a missing feature on
+  // rosters only, long after the field was added.
+  return {
+    ...spec,
+    focus: spec.focus ? { ...spec.focus } : undefined,
+    palette,
+    parts,
+  };
+}
+
+// Render a roster of variants — one per seed.
+export function renderRoster(spec, seeds, opts = {}) {
+  return seeds.map(seed => ({
+    seed,
+    svg: renderAvatar(variantSpec(spec, seed, opts), opts)
+  }));
+}
+
 // Convenience for Node consumers: everything in one namespace.
-export default { renderPart, renderAvatar, renderTile, renderIdle, expressionNames };
+export default { renderPart, renderAvatar, renderTile, renderIdle, expressionNames, seededTrait, variantSpec, renderRoster };
