@@ -34,29 +34,37 @@ let _cid = 0;
 // brand-lab.html's innerHTML). Escape every spec-derived value used inside a
 // markup attribute or text node to prevent it breaking out into new markup.
 const ESCAPE_MAP = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-const esc = v => String(v).replace(/[&<>"']/g, c => ESCAPE_MAP[c]);
+const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ESCAPE_MAP[c]);
 
-const color = (pal, key) => esc((key && pal[key]) ? pal[key] : (key || "none"));
-const isSet = v => v !== null && v !== undefined;
+const color = (pal, key) => esc(key && pal[key] ? pal[key] : key || "none");
+const isSet = (v) => v !== null && v !== undefined;
 
 function attrRotate(p) {
-  return p.rotate ? ` transform="rotate(${esc(p.rotate)} ${esc(p.cx ?? 0)} ${esc(p.cy ?? 0)})"` : "";
+  return p.rotate
+    ? ` transform="rotate(${esc(p.rotate)} ${esc(p.cx ?? 0)} ${esc(p.cy ?? 0)})"`
+    : "";
 }
 function attrStroke(pal, p) {
   const s = p.stroke && pal[p.stroke] ? pal[p.stroke] : p.stroke;
   if (!s || s === "none") return "";
-  return ` stroke="${esc(s)}" stroke-linecap="round" stroke-linejoin="round"` +
-         (p.strokeWidth ? ` stroke-width="${esc(p.strokeWidth)}"` : "");
+  return (
+    ` stroke="${esc(s)}" stroke-linecap="round" stroke-linejoin="round"` +
+    (p.strokeWidth ? ` stroke-width="${esc(p.strokeWidth)}"` : "")
+  );
 }
 
 // Render one part to an SVG element string.
 export function renderPart(p, pal) {
   const fill = color(pal, p.fill);
-  const st = attrStroke(pal, p), rot = attrRotate(p);
+  const st = attrStroke(pal, p),
+    rot = attrRotate(p);
   switch (p.type) {
     case "rect":
-      return `<rect x="${esc(p.x)}" y="${esc(p.y)}" width="${esc(p.w)}" height="${esc(p.h)}"` +
-        (isSet(p.rx) ? ` rx="${esc(p.rx)}"` : "") + ` fill="${fill}"${st}${rot}/>`;
+      return (
+        `<rect x="${esc(p.x)}" y="${esc(p.y)}" width="${esc(p.w)}" height="${esc(p.h)}"` +
+        (isSet(p.rx) ? ` rx="${esc(p.rx)}"` : "") +
+        ` fill="${fill}"${st}${rot}/>`
+      );
     case "ellipse":
       return `<ellipse cx="${esc(p.cx)}" cy="${esc(p.cy)}" rx="${esc(p.rx)}" ry="${esc(p.ry)}" fill="${fill}"${st}${rot}/>`;
     case "circle":
@@ -64,9 +72,12 @@ export function renderPart(p, pal) {
     case "path":
       return `<path d="${esc(p.d)}" fill="${fill}"${st}${rot}/>`;
     case "text":
-      return `<text x="${esc(p.x)}" y="${esc(p.y)}" font-size="${esc(p.size)}"` +
+      return (
+        `<text x="${esc(p.x)}" y="${esc(p.y)}" font-size="${esc(p.size)}"` +
         (p.weight ? ` font-weight="${esc(p.weight)}"` : "") +
-        (p.italic ? ` font-style="italic"` : "") + ` fill="${fill}"${st}${rot}>${esc(p.text)}</text>`;
+        (p.italic ? ` font-style="italic"` : "") +
+        ` fill="${fill}"${st}${rot}>${esc(p.text)}</text>`
+      );
     default:
       return "";
   }
@@ -76,7 +87,7 @@ export function renderPart(p, pal) {
 // the property (so a spec can turn an ellipse eye into a path arc, etc.).
 function applyExpression(parts, expr) {
   const ov = expr || {};
-  return parts.map(p => {
+  return parts.map((p) => {
     if (!ov[p.id]) return p;
     const merged = { ...p, ...ov[p.id] };
     for (const k of Object.keys(ov[p.id])) if (ov[p.id][k] === null) delete merged[k];
@@ -92,7 +103,10 @@ function viewBoxOf(spec) {
   return { x0, y0, w, h, vb: spec.viewBox.join(" ") };
 }
 function splitField(parts) {
-  return { fieldPart: parts.find(p => p.id === "field"), rest: parts.filter(p => p.id !== "field") };
+  return {
+    fieldPart: parts.find((p) => p.id === "field"),
+    rest: parts.filter((p) => p.id !== "field"),
+  };
 }
 function paintField(fieldPart, pal, showField = true) {
   return showField && fieldPart ? renderPart(fieldPart, pal) : "";
@@ -113,26 +127,32 @@ function svgAt(size, viewBox, inner) {
 // touch about the focus point, in one flat color. Works for any animal because
 // it never assumes a shape — it just inflates the silhouette group.
 function outlineLayer({ parts, focus, colorHex, amount = 0.045 }) {
-  const sil = parts.filter(p => p.silhouette);
+  const sil = parts.filter((p) => p.silhouette);
   if (!sil.length) return "";
-  const inked = sil.map(p => renderPart({ ...p, fill: "__o", stroke: undefined }, { __o: colorHex })).join("");
-  const s = 1 + amount, cx = focus?.cx ?? 200, cy = focus?.cy ?? 200;
+  const inked = sil
+    .map((p) => renderPart({ ...p, fill: "__o", stroke: undefined }, { __o: colorHex }))
+    .join("");
+  const s = 1 + amount,
+    cx = focus?.cx ?? 200,
+    cy = focus?.cy ?? 200;
   return `<g transform="translate(${cx - s * cx} ${cy - s * cy}) scale(${s})">${inked}</g>`;
 }
 function maybeOutline(parts, focus, outline) {
   return outline ? outlineLayer({ parts, focus, colorHex: outline }) : "";
 }
 function accessoryParts(spec, accessory, pal) {
-  return (spec.accessories?.[accessory] || []).map(p => renderPart(p, pal)).join("");
+  return (spec.accessories?.[accessory] || []).map((p) => renderPart(p, pal)).join("");
 }
 function headTurnX(headTurn) {
   return Math.round(Math.max(-1, Math.min(1, +headTurn || 0)) * 18 * 100) / 100;
 }
 function paintParts(parts, pal, dx) {
-  return parts.map(p => {
-    const el = renderPart(p, pal);
-    return dx && !p.silhouette ? `<g transform="translate(${esc(dx)} 0)">${el}</g>` : el;
-  }).join("");
+  return parts
+    .map((p) => {
+      const el = renderPart(p, pal);
+      return dx && !p.silhouette ? `<g transform="translate(${esc(dx)} 0)">${el}</g>` : el;
+    })
+    .join("");
 }
 function maybeFlip(flip, x0, w, inner) {
   return flip ? `<g transform="translate(${esc(2 * x0 + w)} 0) scale(-1 1)">${inner}</g>` : inner;
@@ -153,7 +173,16 @@ function tileFocus(spec, { x0, y0, w, h }) {
 //   flip (bool) — mirror the whole character horizontally about the viewBox
 //     center (wraps the tilt group in scale(-1,1)). Both default to no-ops.
 export function renderAvatar(spec, opts = {}) {
-  const { expression, accessory, field = "field", size = 240, outline = null, showField = true, headTurn = 0, flip = false } = opts;
+  const {
+    expression,
+    accessory,
+    field = "field",
+    size = 240,
+    outline = null,
+    showField = true,
+    headTurn = 0,
+    flip = false,
+  } = opts;
   const pal = paletteFor(spec, field);
   const box = viewBoxOf(spec);
   const parts = applyExpression(spec.parts, spec.expressions?.[expression]);
@@ -169,20 +198,28 @@ export function renderAvatar(spec, opts = {}) {
 // Guarantees the icon can never drift from the character — it is the character.
 export function renderTile(spec, opts = {}) {
   const { size = 64, shape = "round", radius = 0.23, field = "field", bg } = opts;
-  const id = "m" + (_cid++);
-  const box = viewBoxOf(spec), { w, h } = box;
+  const id = "m" + _cid++;
+  const box = viewBoxOf(spec),
+    { w, h } = box;
   const f = tileFocus(spec, box);
-  const s = f.scale ?? 0.9, cx = w / 2, cy = h * 0.52;
+  const s = f.scale ?? 0.9,
+    cx = w / 2,
+    cy = h * 0.52;
   const fill = esc(bg || paletteFor(spec, field).field);
   const inner = renderAvatar(spec, { size, showField: false }).replace(/^<svg[^>]*>|<\/svg>$/g, "");
-  return svgAt(size, `0 0 ${w} ${h}`,
+  return svgAt(
+    size,
+    `0 0 ${w} ${h}`,
     `<defs><clipPath id="${id}">${tileShape(shape, w, h, radius)}</clipPath></defs>` +
-    `<g clip-path="url(#${id})"><rect width="${w}" height="${h}" fill="${fill}"/>` +
-    `<g transform="translate(${cx - s * f.cx} ${cy - s * f.cy}) scale(${s})">${inner}</g></g>`);
+      `<g clip-path="url(#${id})"><rect width="${w}" height="${h}" fill="${fill}"/>` +
+      `<g transform="translate(${cx - s * f.cx} ${cy - s * f.cy}) scale(${s})">${inner}</g></g>`,
+  );
 }
 
 // ---- expression sheet -------------------------------------------------------
-export function expressionNames(spec) { return Object.keys(spec.expressions || { happy: {} }); }
+export function expressionNames(spec) {
+  return Object.keys(spec.expressions || { happy: {} });
+}
 
 function idleUnit(property) {
   if (property === "rotate") return "deg";
@@ -199,29 +236,37 @@ function idleIter(idle) {
 }
 function compileOneTrack(t, i, iid, cls) {
   if (!t.keys?.length) return "";
-  const name = iid + "k" + i, unit = idleUnit(t.property);
+  const name = iid + "k" + i,
+    unit = idleUnit(t.property);
   const dur = t.keys[t.keys.length - 1][0];
   if (!(dur > 0)) return "";
-  const frames = t.keys.map(([time, v]) => {
-    const pct = (time / dur * 100).toFixed(1);
-    return `${pct}%{transform:${idleTransform(t.property, v, unit)}}`;
-  }).join("");
+  const frames = t.keys
+    .map(([time, v]) => {
+      const pct = ((time / dur) * 100).toFixed(1);
+      return `${pct}%{transform:${idleTransform(t.property, v, unit)}}`;
+    })
+    .join("");
   const targets = Array.isArray(t.target) ? t.target : [t.target];
-  targets.forEach(id => { (cls[id] = cls[id] || []).push({ name, dur }); });
+  targets.forEach((id) => {
+    (cls[id] = cls[id] || []).push({ name, dur });
+  });
   return `@keyframes ${name}{${frames}}`;
 }
 function compileIdleTracks(tracks, iid, cls) {
   let css = "";
-  (tracks || []).forEach((t, i) => { css += compileOneTrack(t, i, iid, cls); });
+  (tracks || []).forEach((t, i) => {
+    css += compileOneTrack(t, i, iid, cls);
+  });
   return css;
 }
 function originOf(p) {
-  const ox = isSet(p.cx) ? `${esc(p.cx)}px` : "50%", oy = isSet(p.cy) ? `${esc(p.cy)}px` : "50%";
+  const ox = isSet(p.cx) ? `${esc(p.cx)}px` : "50%",
+    oy = isSet(p.cy) ? `${esc(p.cy)}px` : "50%";
   return `${ox} ${oy}`;
 }
 function wrapIdlePart(p, el, anims, iter) {
   if (!anims) return el;
-  const anim = anims.map(x => `${esc(x.name)} ${esc(x.dur)}s ease-in-out ${iter}`).join(",");
+  const anim = anims.map((x) => `${esc(x.name)} ${esc(x.dur)}s ease-in-out ${iter}`).join(",");
   return `<g class="cr-${esc(p.id)}" style="animation:${anim};transform-box:view-box;transform-origin:${originOf(p)}">${el}</g>`;
 }
 
@@ -234,14 +279,18 @@ export function renderIdle(spec, opts = {}) {
   const box = viewBoxOf(spec);
   const idle = spec.animations?.idle;
   const { fieldPart, rest } = splitField(spec.parts);
-  const iid = "m" + (_cid++); // unique per call, so keyframe names never collide across mascots on one page
+  const iid = "m" + _cid++; // unique per call, so keyframe names never collide across mascots on one page
   const iter = idleIter(idle);
   const cls = {}; // partId -> [animName...]
-  const css = "@media(prefers-reduced-motion:reduce){[class^=cr-]{animation:none!important}}" +
+  const css =
+    "@media(prefers-reduced-motion:reduce){[class^=cr-]{animation:none!important}}" +
     compileIdleTracks(idle?.tracks, iid, cls);
-  const body = rest.map(p => wrapIdlePart(p, renderPart(p, pal), cls[p.id], iter)).join("");
-  return svgAt(size, `${box.x0} ${box.y0} ${box.w} ${box.h}`,
-    `<style>${css}</style>` + paintField(fieldPart, pal) + withTilt(spec, box, body));
+  const body = rest.map((p) => wrapIdlePart(p, renderPart(p, pal), cls[p.id], iter)).join("");
+  return svgAt(
+    size,
+    `${box.x0} ${box.y0} ${box.w} ${box.h}`,
+    `<style>${css}</style>` + paintField(fieldPart, pal) + withTilt(spec, box, body),
+  );
 }
 
 // ---- seeded roster (deterministic variants from one spec) ------------------
@@ -286,10 +335,14 @@ function hexToRgb(hex) {
   return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
 }
 function rgbToHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const mx = Math.max(r, g, b),
+    mn = Math.min(r, g, b);
   const l = (mx + mn) / 2;
-  let h = 0, s = 0;
+  let h = 0,
+    s = 0;
   if (mx !== mn) {
     const d = mx - mn;
     s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
@@ -311,17 +364,19 @@ function hue2rgb(p, q, t) {
 }
 
 function hslToRgbStr({ h, s, l }) {
-  h /= 360; s /= 100; l /= 100;
+  h /= 360;
+  s /= 100;
+  l /= 100;
   if (s === 0) {
     const g = Math.round(l * 255);
-    return "#" + [g, g, g].map(v => v.toString(16).padStart(2, "0")).join("");
+    return "#" + [g, g, g].map((v) => v.toString(16).padStart(2, "0")).join("");
   }
   const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
   const p = 2 * l - q;
   const r = Math.round(hue2rgb(p, q, h + 1 / 3) * 255);
   const g = Math.round(hue2rgb(p, q, h) * 255);
   const b = Math.round(hue2rgb(p, q, h - 1 / 3) * 255);
-  return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+  return "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
 }
 // #rgb, #rgba, #rrggbb, #rrggbbaa — the forms hexToRgb can actually read.
 const HEX_RE = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -337,7 +392,7 @@ function rotateHex(hex, degrees) {
   }
   const { r, g, b } = hexToRgb(hex);
   const hsl = rgbToHsl(r, g, b);
-  hsl.h = ((hsl.h + degrees) % 360 + 360) % 360;
+  hsl.h = (((hsl.h + degrees) % 360) + 360) % 360;
   return hslToRgbStr(hsl);
 }
 
@@ -359,7 +414,7 @@ function rotatePalette(palette, hueOff) {
 // a roster one character rather than a set of unrelated creatures.
 const JITTERED = ["rx", "ry", "cx", "cy"];
 function jitterSilhouettes(parts, seed, jitter) {
-  return parts.map(part => {
+  return parts.map((part) => {
     const p = { ...part };
     if (!p.silhouette) return p;
     for (const prop of JITTERED) {
@@ -412,11 +467,20 @@ export function variantSpec(spec, seed, opts = {}) {
 
 // Render a roster of variants — one per seed.
 export function renderRoster(spec, seeds, opts = {}) {
-  return seeds.map(seed => ({
+  return seeds.map((seed) => ({
     seed,
-    svg: renderAvatar(variantSpec(spec, seed, opts), opts)
+    svg: renderAvatar(variantSpec(spec, seed, opts), opts),
   }));
 }
 
 // Convenience for Node consumers: everything in one namespace.
-export default { renderPart, renderAvatar, renderTile, renderIdle, expressionNames, seededTrait, variantSpec, renderRoster };
+export default {
+  renderPart,
+  renderAvatar,
+  renderTile,
+  renderIdle,
+  expressionNames,
+  seededTrait,
+  variantSpec,
+  renderRoster,
+};
