@@ -4,27 +4,36 @@
   "description": "Generate a complete, tokenized brand/design system — pick a direction, get CSS design tokens (light + dark), fonts, and a starting point for logo/favicon/OG. SDK + CLI (MCP coming). Productizes the saas-brand-system workflow.",
   "keywords": [
     "branding",
+    "cli",
+    "css-variables",
+    "dark-mode",
     "design-system",
     "design-tokens",
-    "css-variables",
-    "theme",
-    "palette",
-    "oklch",
-    "dark-mode",
     "generator",
-    "cli"
+    "oklch",
+    "palette",
+    "theme"
   ],
+  "homepage": "https://getvibe.dev/vibebrand",
   "license": "MIT",
   "author": "Pooria Arab",
-  "homepage": "https://getvibe.dev/vibebrand",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pooriaarab/vibebrand.git"
   },
-  "type": "module",
   "bin": {
     "vibebrand": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "mascot/engine.js",
+    "mascot/*.avatar.json",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,15 +43,9 @@
     "./mascot/*.avatar.json": "./mascot/*.avatar.json",
     "./package.json": "./package.json"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "sideEffects": false,
-  "files": [
-    "dist",
-    "mascot/engine.js",
-    "mascot/*.avatar.json",
-    "README.md"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
@@ -50,15 +53,12 @@
     "test:unit": "node --test mascot/engine.test.mjs",
     "prepublishOnly": "npm run build"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=18"
-  },
   "devDependencies": {
     "@types/node": "^22",
     "tsup": "^8",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

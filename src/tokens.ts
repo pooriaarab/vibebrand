@@ -99,7 +99,12 @@ function checkPalette(p: Palette, theme: string): ContrastCheck[] {
   ];
   return pairs.map(([pair, a, b, min]) => {
     const ratio = contrastRatio(a, b);
-    return { pair, ratio: Math.round(ratio * 100) / 100, level: wcagLevel(ratio), pass: ratio >= min };
+    return {
+      pair,
+      ratio: Math.round(ratio * 100) / 100,
+      level: wcagLevel(ratio),
+      pass: ratio >= min,
+    };
   });
 }
 
@@ -118,8 +123,18 @@ export function renderTokensJson(d: BrandDirection) {
     shadows: shadowScale(d),
     fonts: d.fonts,
     color: {
-      light: { ...d.light, onPrimary: pickOn(d.light.primary), onSecondary: pickOn(d.light.secondary), onTertiary: pickOn(d.light.tertiary) },
-      dark: { ...d.dark, onPrimary: pickOn(d.dark.primary), onSecondary: pickOn(d.dark.secondary), onTertiary: pickOn(d.dark.tertiary) },
+      light: {
+        ...d.light,
+        onPrimary: pickOn(d.light.primary),
+        onSecondary: pickOn(d.light.secondary),
+        onTertiary: pickOn(d.light.tertiary),
+      },
+      dark: {
+        ...d.dark,
+        onPrimary: pickOn(d.dark.primary),
+        onSecondary: pickOn(d.dark.secondary),
+        onTertiary: pickOn(d.dark.tertiary),
+      },
     },
     contrast: checkContrast(d),
   };

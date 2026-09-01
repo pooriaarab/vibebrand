@@ -21,10 +21,16 @@ export function renderLogoSvg(d: BrandDirection, theme: "light" | "dark" = "ligh
 }
 
 /** Primary lockup as inline SVG: mark + wordmark. */
-export function renderLockupSvg(d: BrandDirection, name: string, theme: "light" | "dark" = "light"): string {
+export function renderLockupSvg(
+  d: BrandDirection,
+  name: string,
+  theme: "light" | "dark" = "light",
+): string {
   const p = d[theme];
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 32" role="img" aria-label="${name}">
-  ${renderLogoSvg(d, theme).replace(/^<svg[^>]*>|<\/svg>$/g, "").trim()}
+  ${renderLogoSvg(d, theme)
+    .replace(/^<svg[^>]*>|<\/svg>$/g, "")
+    .trim()}
   <text x="40" y="22" font-family="${d.fonts.display}, sans-serif" font-size="20" font-weight="700" fill="${p.fg}">${name}</text>
 </svg>`;
 }

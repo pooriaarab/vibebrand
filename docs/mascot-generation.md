@@ -26,13 +26,13 @@ The approved reference is the source of truth. The constraint block (§3) is the
 
 This gets you close. It is still not 100%. True consistency needs a hand-built **vector master**. Treat AI frames as a pitch deck for the character, then redraw.
 
-| Do | Don't |
-|---|---|
-| Lock one on-model reference, then edit | Prompt six poses independently and hope they match |
+| Do                                              | Don't                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------ |
+| Lock one on-model reference, then edit          | Prompt six poses independently and hope they match                       |
 | Pin hex colors and ban inventions in the prompt | Say "a cute `<animal>`" and let the model invent clothes or extra colors |
-| Treat AI output as a preview | Ship AI poses as the production mascot |
-| Rebuild the winner as a vector master | Try to "prompt harder" toward 100% consistency |
-| Regenerate the whole set from the same `$URL` | Mix references mid-batch |
+| Treat AI output as a preview                    | Ship AI poses as the production mascot                                   |
+| Rebuild the winner as a vector master           | Try to "prompt harder" toward 100% consistency                           |
+| Regenerate the whole set from the same `$URL`   | Mix references mid-batch                                                 |
 
 ### Workflow
 
@@ -52,16 +52,16 @@ Prepend this to every generation. Do not paraphrase it. Do not shorten it. Fill 
 Match this exact <animal/character> character with 100% consistency: same <body color> body, same proportions, same thick clean <outline color> outline, flat cartoon style. STRICT palette: <body description>, <PRIMARY #hex> <where primary lives>, <accent #hex> <where accent lives>, <outline color> outline. NO clothing, NO off-palette colors (<banned colors>). All shapes rounded, no pointy edges.
 ```
 
-| Placeholder | What to fill | Example shape (not a brand) |
-|---|---|---|
-| `<animal/character>` | The species or character type | `fox`, `owl`, `blob` |
-| `<body color>` / `<body description>` | Dominant fill | `white fur`, `soft cream body` |
-| `<PRIMARY #hex>` | Brand primary, exact hex | `#3b5bdb` |
-| `<where primary lives>` | The 1–2 features that carry primary | `inner ears and nose` |
-| `<accent #hex>` | Warm or secondary accent, exact hex | `#ffd6e8` |
-| `<where accent lives>` | Usually one feature | `blush cheeks only` |
-| `<outline color>` | Contour | `black` |
-| `<banned colors>` | The colors the model keeps inventing | `brown/tan/beige` |
+| Placeholder                           | What to fill                         | Example shape (not a brand)    |
+| ------------------------------------- | ------------------------------------ | ------------------------------ |
+| `<animal/character>`                  | The species or character type        | `fox`, `owl`, `blob`           |
+| `<body color>` / `<body description>` | Dominant fill                        | `white fur`, `soft cream body` |
+| `<PRIMARY #hex>`                      | Brand primary, exact hex             | `#3b5bdb`                      |
+| `<where primary lives>`               | The 1–2 features that carry primary  | `inner ears and nose`          |
+| `<accent #hex>`                       | Warm or secondary accent, exact hex  | `#ffd6e8`                      |
+| `<where accent lives>`                | Usually one feature                  | `blush cheeks only`            |
+| `<outline color>`                     | Contour                              | `black`                        |
+| `<banned colors>`                     | The colors the model keeps inventing | `brown/tan/beige`              |
 
 If you skip this block, the model will invent clothing, off-palette fills, or a different character. If you rewrite it each time, you will get silent drift. Paste it filled, then add the slots from the template.
 
@@ -77,15 +77,15 @@ Build every prompt in this order:
 <constraint> + <angle> + <pose> + <expression> + <props> + <shadow> + <background>
 ```
 
-| Slot | What to put | Notes |
-|---|---|---|
-| **Constraint** | The filled block from §3 | Always first. Never optional. |
-| **Angle** | `front view` / `three-quarter view` / `side profile facing left` / `back view` | One camera. Do not mix "front and side." |
-| **Pose** | `standing` / `waving with one arm up` / `jumping` / `sitting` / `pointing to the right` | Body only. Keep it one action. |
-| **Expression** | `friendly smile` / `thinking` / `sleepy closed eyes` / `confused` / `thumbs-up grin` | Face only. Do not restate the whole character. |
-| **Props** *(optional)* | `small <PRIMARY> thought bubble` / `<PRIMARY> send arrow` / `zzz marks` | Stay on-palette. No brown objects, no clothes. |
-| **Shadow** | `<PRIMARY #hex> pill-shaped shadow under the character` | Always. Never "soft oval shadow." |
-| **Background** | `Plain white background, centered.` | Always last. No scenes, no floors, no gradients. |
+| Slot                   | What to put                                                                             | Notes                                            |
+| ---------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **Constraint**         | The filled block from §3                                                                | Always first. Never optional.                    |
+| **Angle**              | `front view` / `three-quarter view` / `side profile facing left` / `back view`          | One camera. Do not mix "front and side."         |
+| **Pose**               | `standing` / `waving with one arm up` / `jumping` / `sitting` / `pointing to the right` | Body only. Keep it one action.                   |
+| **Expression**         | `friendly smile` / `thinking` / `sleepy closed eyes` / `confused` / `thumbs-up grin`    | Face only. Do not restate the whole character.   |
+| **Props** _(optional)_ | `small <PRIMARY> thought bubble` / `<PRIMARY> send arrow` / `zzz marks`                 | Stay on-palette. No brown objects, no clothes.   |
+| **Shadow**             | `<PRIMARY #hex> pill-shaped shadow under the character`                                 | Always. Never "soft oval shadow."                |
+| **Background**         | `Plain white background, centered.`                                                     | Always last. No scenes, no floors, no gradients. |
 
 Example assembled prompt (front icon):
 
@@ -99,20 +99,20 @@ Keep suffixes short. The constraint block already locked identity; the suffix on
 
 Copy the **Prompt suffix** after the constraint block. Do not regenerate these from a blank canvas — edit the approved reference.
 
-| Asset name | Angle | Pose / Expression | Prompt suffix (after the constraint block) |
-|---|---|---|---|
-| Front icon | Front | Standing, friendly smile | `Front view, standing, friendly smile, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| 3/4 view | Three-quarter | Standing, friendly smile | `Three-quarter view, standing, friendly smile, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Side profile | Side | Standing, neutral-friendly | `Side profile facing left, standing, calm friendly expression, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Back view | Back | Standing | `Back view, standing, <primary features> visible, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Waving | Front / 3/4 | One arm up, happy | `Three-quarter view, waving with one arm raised, happy open smile, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Celebrating | Front | Jump, no clothes | `Front view, jumping in celebration, both arms up, big grin, no clothing, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Thinking | Front | Hand to chin, thought bubble | `Front view, thinking pose with one <hand> to chin, small <PRIMARY> thought bubble, curious expression, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Sleeping | Front / 3/4 | Eyes closed, zzz | `Three-quarter view, sleeping sitting or curled, eyes closed, soft smile, <PRIMARY> zzz marks, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Pointing / presenting | 3/4 | Arm out, presenting | `Three-quarter view, pointing to the right with one arm extended, presenting smile, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Confused / 404 | Front | Lost, tilted head | `Front view, confused, head slightly tilted, puzzled eyes, small <PRIMARY> question mark, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Error / oops | Front | Wince, raised hands | `Front view, oops pose, sheepish wince, <hands> raised, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
-| Success thumbs-up | Front | Thumbs-up, grin | `Front view, one <hand> thumbs-up, proud grin, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
+| Asset name            | Angle         | Pose / Expression            | Prompt suffix (after the constraint block)                                                                                                                                                        |
+| --------------------- | ------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Front icon            | Front         | Standing, friendly smile     | `Front view, standing, friendly smile, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                                                                  |
+| 3/4 view              | Three-quarter | Standing, friendly smile     | `Three-quarter view, standing, friendly smile, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                                                          |
+| Side profile          | Side          | Standing, neutral-friendly   | `Side profile facing left, standing, calm friendly expression, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                                          |
+| Back view             | Back          | Standing                     | `Back view, standing, <primary features> visible, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                                                       |
+| Waving                | Front / 3/4   | One arm up, happy            | `Three-quarter view, waving with one arm raised, happy open smile, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                                      |
+| Celebrating           | Front         | Jump, no clothes             | `Front view, jumping in celebration, both arms up, big grin, no clothing, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                               |
+| Thinking              | Front         | Hand to chin, thought bubble | `Front view, thinking pose with one <hand> to chin, small <PRIMARY> thought bubble, curious expression, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.` |
+| Sleeping              | Front / 3/4   | Eyes closed, zzz             | `Three-quarter view, sleeping sitting or curled, eyes closed, soft smile, <PRIMARY> zzz marks, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`          |
+| Pointing / presenting | 3/4           | Arm out, presenting          | `Three-quarter view, pointing to the right with one arm extended, presenting smile, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                     |
+| Confused / 404        | Front         | Lost, tilted head            | `Front view, confused, head slightly tilted, puzzled eyes, small <PRIMARY> question mark, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`               |
+| Error / oops          | Front         | Wince, raised hands          | `Front view, oops pose, sheepish wince, <hands> raised, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                                                 |
+| Success thumbs-up     | Front         | Thumbs-up, grin              | `Front view, one <hand> thumbs-up, proud grin, <PRIMARY #hex> pill-shaped shadow under the character. Plain white background, centered.`                                                          |
 
 Need a pose that is not in the table? Keep the constraint block, pick one angle, one pose, one expression, optional on-palette accent, then the pill shadow and white background.
 
@@ -148,10 +148,10 @@ Do not trace a raster still into SVG and call it done. Generate a real vector (R
 
 1. **Strip baked backgrounds.** Recraft often embeds a white rect or a metadata blob. Delete anything that is not the mark.
 2. **Strip metadata / editor junk.** Remove `data-*` attributes, unused defs, and foreign namespaces you do not need.
-3. **Normalize colors to exact brand hexes.** Models land *near* `#3b5bdb` and ship `#3a5cdb` or a fill that is not in the token file. Search-and-replace every fill/stroke onto the locked tokens (`<PRIMARY #hex>`, `<accent #hex>`, outline, body). If the mark introduces a second unofficial red/pink/blue, that is a palette split — migrate it onto the token or formally add the new hex. Do not leave both.
+3. **Normalize colors to exact brand hexes.** Models land _near_ `#3b5bdb` and ship `#3a5cdb` or a fill that is not in the token file. Search-and-replace every fill/stroke onto the locked tokens (`<PRIMARY #hex>`, `<accent #hex>`, outline, body). If the mark introduces a second unofficial red/pink/blue, that is a palette split — migrate it onto the token or formally add the new hex. Do not leave both.
 4. **Crop to the mark.** Tight viewBox, no leftover canvas. The face-icon crop of the front mascot is usually the right starting silhouette.
 
-The mark and the mascot must read as the same character. If the logo face does not match the approved mascot face, regenerate the vector from a prompt that describes *that* face — do not invent a third identity.
+The mark and the mascot must read as the same character. If the logo face does not match the approved mascot face, regenerate the vector from a prompt that describes _that_ face — do not invent a third identity.
 
 ---
 
@@ -159,11 +159,11 @@ The mark and the mascot must read as the same character. If the logo face does n
 
 Use **WaveSpeed CLI**. Two jobs, two models:
 
-| Job | Model | Notes |
-|---|---|---|
-| Pose variants | `openai/gpt-image-1.5/edit` | Image-to-image from the approved frame. `input_fidelity=high`. ~$0.10 |
-| Base concept only | `openai/gpt-image-1.5/text-to-image` | Once. After one frame is approved, stop using this for the character. ~$0.04 |
-| Native SVG logo | Recraft text-to-vector (e.g. `recraft-ai/recraft-v3` / `recraft/text-to-vector`) | Match the mascot face. Then strip + normalize (§6). |
+| Job               | Model                                                                            | Notes                                                                        |
+| ----------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Pose variants     | `openai/gpt-image-1.5/edit`                                                      | Image-to-image from the approved frame. `input_fidelity=high`. ~$0.10        |
+| Base concept only | `openai/gpt-image-1.5/text-to-image`                                             | Once. After one frame is approved, stop using this for the character. ~$0.04 |
+| Native SVG logo   | Recraft text-to-vector (e.g. `recraft-ai/recraft-v3` / `recraft/text-to-vector`) | Match the mascot face. Then strip + normalize (§6).                          |
 
 **zsh gotcha:** quote the size or the shell will glob the `*`.
 
@@ -226,28 +226,28 @@ Generate (or rig) only what a surface actually needs.
 
 ### Marketing site
 
-| Surface | Asset to use |
-|---|---|
-| Hero | Waving or pointing / presenting |
-| Feature sections | Pointing / presenting (aimed at the UI) |
-| Pricing | Celebrating (jump, no clothes) |
-| Testimonials | Front icon or 3/4, happy smile |
+| Surface           | Asset to use                                        |
+| ----------------- | --------------------------------------------------- |
+| Hero              | Waving or pointing / presenting                     |
+| Feature sections  | Pointing / presenting (aimed at the UI)             |
+| Pricing           | Celebrating (jump, no clothes)                      |
+| Testimonials      | Front icon or 3/4, happy smile                      |
 | Blog / OG headers | 3/4 or side profile as a background accent + mascot |
-| Footer | Small sitting pose (front or 3/4, compact) |
-| 404 page | Confused / 404 |
+| Footer            | Small sitting pose (front or 3/4, compact)          |
+| 404 page          | Confused / 404                                      |
 
 ### In-app
 
-| Surface | Asset to use |
-|---|---|
-| App icon + favicon | Face crop of the front icon (or the cleaned SVG mark) |
-| Onboarding | Wave loop / waving still |
-| Empty states | Thinking or sleeping |
-| Loading | Loading hop |
-| Success toasts | Celebrate jump or success thumbs-up |
-| Error states | Error / oops |
-| Upgrade / paywall | Pointing / presenting |
-| Achievement / streak | Celebrating |
+| Surface              | Asset to use                                          |
+| -------------------- | ----------------------------------------------------- |
+| App icon + favicon   | Face crop of the front icon (or the cleaned SVG mark) |
+| Onboarding           | Wave loop / waving still                              |
+| Empty states         | Thinking or sleeping                                  |
+| Loading              | Loading hop                                           |
+| Success toasts       | Celebrate jump or success thumbs-up                   |
+| Error states         | Error / oops                                          |
+| Upgrade / paywall    | Pointing / presenting                                 |
+| Achievement / streak | Celebrating                                           |
 
 ### Lottie / Rive pipeline
 
@@ -262,14 +262,14 @@ For real animation:
 
 Do not animate clothing. There is no clothing. Keep fills on the closed palette.
 
-| Animation | Motion | Where it is used |
-|---|---|---|
-| Idle twitch + blink | Subtle feature bounce, occasional blink | Empty states |
-| Wave loop | One arm cycles a greeting | Onboarding welcome |
-| Celebrate jump | Anticipation, jump, land, arms up | Task complete / success toast |
-| Sleepy breathing | Slow body scale, closed eyes, zzz | Paused / idle |
-| Loading hop | Small repeating hop in place | Loading spinner |
-| Point-and-present | Arm extends, holds, retracts | Feature callouts |
+| Animation           | Motion                                  | Where it is used              |
+| ------------------- | --------------------------------------- | ----------------------------- |
+| Idle twitch + blink | Subtle feature bounce, occasional blink | Empty states                  |
+| Wave loop           | One arm cycles a greeting               | Onboarding welcome            |
+| Celebrate jump      | Anticipation, jump, land, arms up       | Task complete / success toast |
+| Sleepy breathing    | Slow body scale, closed eyes, zzz       | Paused / idle                 |
+| Loading hop         | Small repeating hop in place            | Loading spinner               |
+| Point-and-present   | Arm extends, holds, retracts            | Feature callouts              |
 
 Build these six first. They cover the in-app surfaces above. New loops should still start from the same vector master, not from a new AI still.
 
