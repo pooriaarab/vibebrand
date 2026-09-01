@@ -2,17 +2,8 @@
 import { writeFileSync } from "node:fs";
 
 import { DIRECTIONS, getDirection } from "./catalog.js";
-import {
-  renderTokensCss,
-  renderTokensJson,
-  googleFontsHref,
-  checkContrast,
-} from "./tokens.js";
-import {
-  renderLogoSvg,
-  renderTailwindTheme,
-  renderInitFiles,
-} from "./generators.js";
+import { renderTokensCss, renderTokensJson, googleFontsHref, checkContrast } from "./tokens.js";
+import { renderLogoSvg, renderTailwindTheme, renderInitFiles } from "./generators.js";
 import type { BrandDirection } from "./catalog.js";
 
 const [cmd, arg, arg2] = process.argv.slice(2);
@@ -27,7 +18,9 @@ function listDirections() {
 function need(id: string | undefined) {
   const d = id ? getDirection(id) : undefined;
   if (!d) {
-    console.error(`unknown direction: ${id ?? "(none)"}\nrun \`vibebrand directions\` to list them.`);
+    console.error(
+      `unknown direction: ${id ?? "(none)"}\nrun \`vibebrand directions\` to list them.`,
+    );
     process.exit(1);
   }
   return d;
@@ -64,7 +57,8 @@ switch (cmd) {
     break;
   }
   case "check": {
-    const targets: BrandDirection[] = arg === "--all" || arg === undefined ? DIRECTIONS : [need(arg)];
+    const targets: BrandDirection[] =
+      arg === "--all" || arg === undefined ? DIRECTIONS : [need(arg)];
     let failed = 0;
     for (const d of targets) {
       const checks = checkContrast(d);
@@ -73,7 +67,9 @@ switch (cmd) {
       const mark = bad.length === 0 ? "PASS" : "FAIL";
       console.log(`\n${mark}  ${d.id} — ${d.name}`);
       for (const c of checks) {
-        console.log(`  ${c.pass ? "ok " : "XX "} ${c.ratio.toFixed(2).padStart(5)}:1  ${c.level.padEnd(8)}  ${c.pair}`);
+        console.log(
+          `  ${c.pass ? "ok " : "XX "} ${c.ratio.toFixed(2).padStart(5)}:1  ${c.level.padEnd(8)}  ${c.pair}`,
+        );
       }
     }
     if (failed > 0) {

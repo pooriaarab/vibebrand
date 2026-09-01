@@ -17,12 +17,7 @@ export {
   pickOn,
   type ContrastCheck,
 } from "./tokens.js";
-export {
-  contrastRatio,
-  wcagLevel,
-  relativeLuminance,
-  type WcagLevel,
-} from "./contrast.js";
+export { contrastRatio, wcagLevel, relativeLuminance, type WcagLevel } from "./contrast.js";
 export {
   renderLogoSvg,
   renderLockupSvg,
