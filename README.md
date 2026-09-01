@@ -6,7 +6,7 @@ tokens (light + dark), a font pairing, and a starting point for the rest of the
 brand kit.
 
 Productizes the `saas-brand-system` workflow: instead of hand-rolling a palette
-and theme every time, commit to a *direction* and generate the foundation.
+and theme every time, commit to a _direction_ and generate the foundation.
 
 ```bash
 npx vibebrand directions          # list the directions
@@ -25,9 +25,9 @@ const css = renderTokensCss(getDirection("blueprint")!);
 
 // or the façade
 const vb = createVibebrand();
-vb.directions();        // all 14
-vb.tokens("aurora");    // CSS custom properties
-vb.json("aurora");      // structured token object
+vb.directions(); // all 14
+vb.tokens("aurora"); // CSS custom properties
+vb.json("aurora"); // structured token object
 ```
 
 Each direction ships a **3-color system** (`--primary` / `--secondary` /

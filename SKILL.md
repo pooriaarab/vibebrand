@@ -23,11 +23,11 @@ Or as a library: `import { getDirection, renderTokensCss } from "vibebrand"`.
 ## When to use
 
 - A project has **no brand yet** and you need a real, distinct starting point (not a
-  default). Pick a direction whose *emotion* fits the product, generate its tokens, build
+  default). Pick a direction whose _emotion_ fits the product, generate its tokens, build
   inside them.
 - You want a themeable token layer (light + dark) with a matched radius + shadow language.
 
-For the full multi-direction *exploration* (build several prototypes, review, pick) use the
+For the full multi-direction _exploration_ (build several prototypes, review, pick) use the
 `saas-brand-system` skill — vibebrand is the packaged token generator for the chosen direction.
 
 ## Mascot system
@@ -38,9 +38,9 @@ accessories, light/dark, and a CSS idle animation — via `mascot/engine.js`.
 
 ```js
 import { renderAvatar, renderTile, renderIdle } from "vibebrand/mascot/engine.js";
-renderAvatar(spec, { expression: "happy" });   // hero
-renderTile(spec, { size: 32 });                 // favicon
-renderIdle(spec);                               // ambient animation
+renderAvatar(spec, { expression: "happy" }); // hero
+renderTile(spec, { size: 32 }); // favicon
+renderIdle(spec); // ambient animation
 ```
 
 - **Reference specs:** `mascot/rabbit.avatar.json`, `bat.avatar.json`, `sheep.avatar.json`

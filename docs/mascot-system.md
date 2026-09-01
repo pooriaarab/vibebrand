@@ -124,7 +124,7 @@ separately; this covers the ambient life a mascot needs everywhere.
    placements, light/dark — on one HTML page. You cannot judge a mascot from a
    single hero render.
 2. **Hand-draw the vector; don't generate-then-trace.** Text-to-image is great
-   for exploring a *direction*, but auto-tracing the result (vtracer and friends)
+   for exploring a _direction_, but auto-tracing the result (vtracer and friends)
    produces broken, unusable SVG. Build the geometry by hand once; that is what
    becomes the spec.
 3. **Review by looking.** For a visual match, screenshot each state and compare
@@ -157,13 +157,13 @@ character, keeping the **face unchanged** is the rule that makes the roster look
 like one family instead of N unrelated species.
 
 The face — eyes, nose, mouth — is the part a viewer reads to recognise the
-character. Move the eyes and the rabbit stops being *the* rabbit; it becomes a
+character. Move the eyes and the rabbit stops being _the_ rabbit; it becomes a
 different rabbit. So the engine pins every part that does not have
 `silhouette: true` to the original geometry. Across every variant, Alice's rabbit
 and Bob's rabbit share the same eyes, the same nose, the same mouth — and the
 same expression system works identically on both.
 
-What *does* vary:
+What _does_ vary:
 
 - **Colour.** A hue offset from a **fixed, enumerable set** is applied to every
   palette entry except `ink`. The set is defined (default: ten rotations from 0°
