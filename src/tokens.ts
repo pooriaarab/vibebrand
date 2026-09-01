@@ -1,4 +1,4 @@
-import type { BrandDirection, Palette } from "./catalog.js";
+import type { BrandDirection, Palette } from "./brand-types.js";
 import { contrastRatio, wcagLevel, type WcagLevel } from "./contrast.js";
 
 const RADIUS: Record<BrandDirection["radius"], string> = {

@@ -7,8 +7,9 @@
  * const css = renderTokensCss(getDirection("brutalist")!);
  */
 
-export { DIRECTIONS, getDirection } from "./catalog.js";
-export type { BrandDirection, Palette } from "./catalog.js";
+export { getDirection } from "./catalog.js";
+export { DIRECTIONS } from "./directions/index.js";
+export type { BrandDirection, Palette } from "./brand-types.js";
 export {
   renderTokensCss,
   renderTokensJson,
@@ -30,7 +31,8 @@ export {
   renderInitFiles,
 } from "./generators.js";
 
-import { DIRECTIONS, getDirection } from "./catalog.js";
+import { getDirection } from "./catalog.js";
+import { DIRECTIONS } from "./directions/index.js";
 import { renderTokensCss, renderTokensJson, checkContrast } from "./tokens.js";
 
 /** Convenience façade over the catalog + token generators. */

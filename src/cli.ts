@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { writeFileSync } from "node:fs";
 
-import { DIRECTIONS, getDirection } from "./catalog.js";
+import { getDirection } from "./catalog.js";
+import { DIRECTIONS } from "./directions/index.js";
 import {
   renderTokensCss,
   renderTokensJson,
@@ -13,7 +14,7 @@ import {
   renderTailwindTheme,
   renderInitFiles,
 } from "./generators.js";
-import type { BrandDirection } from "./catalog.js";
+import type { BrandDirection } from "./brand-types.js";
 
 const [cmd, arg, arg2] = process.argv.slice(2);
 
