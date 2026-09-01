@@ -1,5 +1,10 @@
 # AGENTS.md
 
+## Brand and design
+
+Read `.agents/brand.md` and `.agents/design.md` before changing any public surface.
+Confirm deployment ownership and user approval before adding live routes.
+
 <!-- pr-standards:start -->
 
 ## Pull requests
