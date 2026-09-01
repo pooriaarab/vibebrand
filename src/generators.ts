@@ -1,4 +1,4 @@
-import type { BrandDirection, Palette } from "./catalog.js";
+import type { BrandDirection, Palette } from "./brand-types.js";
 import { pickOn } from "./tokens.js";
 
 const RADIUS_PX: Record<BrandDirection["radius"], number> = { sharp: 0, soft: 6, round: 12 };
