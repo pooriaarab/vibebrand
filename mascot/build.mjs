@@ -7,11 +7,17 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { renderTile, renderAvatar } from "./engine.js";
 
 const [, , specPath, outDir = "."] = process.argv;
-if (!specPath) { console.error("usage: build.mjs <spec.avatar.json> <outDir>"); process.exit(1); }
+if (!specPath) {
+  console.error("usage: build.mjs <spec.avatar.json> <outDir>");
+  process.exit(1);
+}
 const spec = JSON.parse(readFileSync(specPath, "utf8"));
 mkdirSync(outDir, { recursive: true });
 
-const write = (name, svg) => { writeFileSync(`${outDir}/${name}`, svg + "\n"); console.log("wrote", `${outDir}/${name}`); };
+const write = (name, svg) => {
+  writeFileSync(`${outDir}/${name}`, svg + "\n");
+  console.log("wrote", `${outDir}/${name}`);
+};
 write("favicon.svg", renderTile(spec, { size: 64, shape: "round" }));
 write("icon.svg", renderTile(spec, { size: 512, shape: "round" }));
 write("logo.svg", renderAvatar(spec, { size: 512 }));

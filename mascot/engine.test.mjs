@@ -1,11 +1,7 @@
 // vibebrand · mascot engine tests (node:test, zero dependencies)
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import {
-  seededTrait,
-  variantSpec,
-  renderRoster,
-} from "./engine.js";
+import { seededTrait, variantSpec, renderRoster } from "./engine.js";
 
 // Quiet helper: load the reference spec without import assertions
 import { readFileSync } from "node:fs";
@@ -68,13 +64,19 @@ describe("variantSpec – palette", () => {
     }
     // With 5 seeds and 10 hue slots, probability all 5 hit the same offset is
     // 10 * (1/10)^5 = 0.001 — practically guaranteed to see at least 2 distinct.
-    assert(colors.size > 1, `expected at least 2 distinct body colors across 5 seeds, got ${colors.size}`);
+    assert(
+      colors.size > 1,
+      `expected at least 2 distinct body colors across 5 seeds, got ${colors.size}`,
+    );
   });
 
   it("ink is never hue-rotated", () => {
     for (const seed of ["alice", "bob", "carol", "dave", "eve"]) {
-      assert.strictEqual(variantSpec(spec, seed).palette.ink, spec.palette.ink,
-        `ink changed for seed ${seed}`);
+      assert.strictEqual(
+        variantSpec(spec, seed).palette.ink,
+        spec.palette.ink,
+        `ink changed for seed ${seed}`,
+      );
     }
   });
 
@@ -84,24 +86,29 @@ describe("variantSpec – palette", () => {
     for (const seed of seeds) {
       colors.add(variantSpec(spec, seed).palette.body);
     }
-    assert(colors.size <= DEFAULT_HUES.length,
-      `expected ≤${DEFAULT_HUES.length} distinct body colours, got ${colors.size}`);
+    assert(
+      colors.size <= DEFAULT_HUES.length,
+      `expected ≤${DEFAULT_HUES.length} distinct body colours, got ${colors.size}`,
+    );
   });
 });
 
 describe("variantSpec – silhouette", () => {
   it("face parts (no silhouette:true) are geometrically unchanged vs the source", () => {
     const faceIds = new Set(["eyeL", "eyeR", "nose", "mouth"]);
-    const sourceParts = spec.parts.filter(p => faceIds.has(p.id));
+    const sourceParts = spec.parts.filter((p) => faceIds.has(p.id));
 
     for (const seed of ["alice", "bob", "carol"]) {
       const variant = variantSpec(spec, seed);
       for (const sp of sourceParts) {
-        const vp = variant.parts.find(p => p.id === sp.id);
+        const vp = variant.parts.find((p) => p.id === sp.id);
         for (const k of Object.keys(sp)) {
           if (k === "id") continue;
-          assert.strictEqual(vp[k], sp[k],
-            `face part "${sp.id}" property "${k}" changed for seed "${seed}": ${vp[k]} !== ${sp[k]}`);
+          assert.strictEqual(
+            vp[k],
+            sp[k],
+            `face part "${sp.id}" property "${k}" changed for seed "${seed}": ${vp[k]} !== ${sp[k]}`,
+          );
         }
       }
     }
@@ -117,8 +124,8 @@ describe("variantSpec – silhouette", () => {
     for (const seed of ["jittertest1", "jittertest2", "jittertest3"]) {
       const variant = variantSpec(spec, seed);
       for (const id of silIds) {
-        const orig = spec.parts.find(p => p.id === id);
-        const vp = variant.parts.find(p => p.id === id);
+        const orig = spec.parts.find((p) => p.id === id);
+        const vp = variant.parts.find((p) => p.id === id);
         for (const prop of ["rx", "ry", "cx", "cy"]) {
           if (orig[prop] === undefined) continue;
           // Jittered values should differ — because the offset is non-zero and
@@ -150,7 +157,7 @@ describe("renderRoster", () => {
   });
 
   it("two different seeds produce different SVG output", () => {
-    const [a, b] = renderRoster(spec, ["alice", "bob"]).map(e => e.svg);
+    const [a, b] = renderRoster(spec, ["alice", "bob"]).map((e) => e.svg);
     // Palette differs so SVGs must differ
     assert.notStrictEqual(a, b);
   });
@@ -178,11 +185,11 @@ describe("variantSpec – opts passthrough", () => {
     const v1 = variantSpec(spec, "alice", { jitter: 0 });
     const v2 = variantSpec(spec, "alice", { jitter: 0.2 });
     // With jitter=0, geometry should match source exactly
-    const origBody = spec.parts.find(p => p.id === "body");
-    const v1Body = v1.parts.find(p => p.id === "body");
+    const origBody = spec.parts.find((p) => p.id === "body");
+    const v1Body = v1.parts.find((p) => p.id === "body");
     assert.strictEqual(v1Body.cx, origBody.cx, "jitter=0 should leave cx unchanged");
     // With jitter=0.2 they should differ
-    const v2Body = v2.parts.find(p => p.id === "body");
+    const v2Body = v2.parts.find((p) => p.id === "body");
     assert.notStrictEqual(v2Body.cx, origBody.cx);
   });
 });

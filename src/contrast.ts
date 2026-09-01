@@ -75,7 +75,8 @@ export function _selfCheck(): void {
   if (Math.abs(wb - 21) > 0.5) throw new Error(`white/black should be ~21, got ${wb.toFixed(2)}`);
   if (contrastRatio(black, black) > 1.01) throw new Error("same color must be ~1");
   // mid grey on white is a known ~AA-ish anchor: just assert ordering sanity
-  if (relativeLuminance(white) <= relativeLuminance(black)) throw new Error("white must be brighter than black");
+  if (relativeLuminance(white) <= relativeLuminance(black))
+    throw new Error("white must be brighter than black");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
